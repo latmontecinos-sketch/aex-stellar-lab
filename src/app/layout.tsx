@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { SiteHeader } from "@/components/site-header";
-import { site } from "@/content/lab";
+import { site } from "@/content/schema";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -9,9 +9,11 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
+// La fuente mono solo aparece en las páginas de tareas: no se precarga en todas.
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  preload: false,
 });
 
 export const metadata: Metadata = {

@@ -1,20 +1,29 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { EXPLORER, ORIGINAL_CONTRACT } from "@/lib/stellar";
+import { CONTRACT_SOURCE, CONTRACT_TESTS, ORIGINAL, TTL_DAYS, explorer } from "@/lib/deployment";
+import { formatXlm } from "@/lib/format";
+import { CLI_STEPS } from "@/components/how-i-did-it";
+import { taskBySlug } from "@/content/tasks";
+import { SmartLink } from "@/components/ui";
 
 export const metadata: Metadata = {
   title: "Aex Pass",
   description: "Tarea de Stellar Elite: invocación de un contrato del track Event Pass, con su ejecución y explicación.",
 };
 
-const VIDEO_ID = "1-nq9EBfyCn2hW4X8z4S2fxjh59gtMGR-";
-const VIDEO_URL = `https://drive.google.com/file/d/${VIDEO_ID}/view`;
+const task = taskBySlug("aex-pass");
+const video = task.videoDriveId
+  ? {
+      view: `https://drive.google.com/file/d/${task.videoDriveId}/view`,
+      embed: `https://drive.google.com/file/d/${task.videoDriveId}/preview`,
+    }
+  : null;
 
 const checklist: { done: boolean; text: string; link?: { label: string; href: string } }[] = [
   {
     done: true,
     text: "Un contrato propio del track Event Pass: el ledger verifica que una cuenta compró su pase y que lo usó una sola vez.",
-    link: { label: "Ver el código", href: "https://github.com/latmontecinos-sketch/aex-pass/blob/main/src/lib.rs" },
+    link: { label: "Ver el código", href: CONTRACT_SOURCE },
   },
   {
     done: true,
@@ -24,27 +33,25 @@ const checklist: { done: boolean; text: string; link?: { label: string; href: st
   {
     done: true,
     text: "El evento y el estado resultante vistos en el explorador: los eventos bought y checked_in, y el pase en Used.",
-    link: { label: "Abrir el contrato", href: `${EXPLORER}/contract/${ORIGINAL_CONTRACT}` },
+    link: { label: "Abrir el contrato", href: explorer.contract(ORIGINAL.contract) },
   },
   {
     done: true,
     text: "Qué sigo aprendiendo (abajo).",
   },
-  {
-    done: true,
-    text: "El video de 3 minutos, entregado el 23 de septiembre.",
-    link: { label: "Ver el video", href: VIDEO_URL },
-  },
+  video
+    ? { done: true, text: "El video de 3 minutos, entregado el 23 de septiembre.", link: { label: "Ver el video", href: video.view } }
+    : { done: false, text: "El video de 3 minutos." },
 ];
 
 const nextSteps = [
   {
     title: "El ciclo de vida del storage",
-    text: "El TTL y la renta: mi primera compra pagó 17,64 XLM por guardar datos 120 días. Quiero ajustar ese plazo a la duración real de un evento.",
+    text: `El TTL y la renta: mi primera compra pagó ${formatXlm(ORIGINAL.buy.feeStroops, 2)} XLM por guardar datos ${TTL_DAYS} días. Quiero ajustar ese plazo a la duración real de un evento.`,
   },
   {
     title: "Testing más profundo",
-    text: "Mis pruebas ya verifican hasta el árbol de firmas. Lo siguiente es sumar fuzzing antes de mover dinero real.",
+    text: `Mis ${CONTRACT_TESTS} pruebas ya verifican el árbol de firmas, los eventos y el TTL. Lo siguiente es sumar fuzzing antes de mover dinero real.`,
   },
   {
     title: "Contratos desde el frontend",
@@ -84,6 +91,7 @@ export default function AexPassSummary() {
           </p>
         </section>
 
+        {video && (
         <section aria-labelledby="video">
           <h2 id="video" className="text-xl font-bold tracking-tight">
             El video
@@ -93,7 +101,7 @@ export default function AexPassSummary() {
           </p>
           <div className="mt-4 aspect-video overflow-hidden rounded-2xl border border-border bg-surface-2">
             <iframe
-              src={`https://drive.google.com/file/d/${VIDEO_ID}/preview`}
+              src={video.embed}
               title="Video del entregable de Aex Pass"
               allow="autoplay; fullscreen"
               allowFullScreen
@@ -102,7 +110,7 @@ export default function AexPassSummary() {
             />
           </div>
           <a
-            href={VIDEO_URL}
+            href={video.view}
             target="_blank"
             rel="noreferrer"
             className="mt-2 inline-block text-sm font-medium text-accent hover:underline"
@@ -110,6 +118,7 @@ export default function AexPassSummary() {
             Abrir en Google Drive ↗
           </a>
         </section>
+        )}
 
         <section aria-labelledby="solucion">
           <h2 id="solucion" className="text-xl font-bold tracking-tight">
@@ -118,7 +127,7 @@ export default function AexPassSummary() {
           <p className="mt-3 leading-relaxed text-muted">
             Elegí <strong className="text-text">Event Pass</strong> y lo llevé a un caso concreto: un pase para
             entrar a un Meet pagado. El contrato <strong className="text-text">Aex Prueba Pass Stellar 01</strong>{" "}
-            cobra 1 XLM, se lo paga al anfitrión y registra el pase; en la puerta, solo el anfitrión puede marcarlo
+            cobra {formatXlm(ORIGINAL.priceStroops)} XLM, se lo paga al anfitrión y registra el pase; en la puerta, solo el anfitrión puede marcarlo
             como usado, y un segundo intento se rechaza.
           </p>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -128,7 +137,7 @@ export default function AexPassSummary() {
             >
               <p className="font-semibold group-hover:text-accent">Ejecución →</p>
               <p className="mt-1 text-sm leading-relaxed text-muted">
-                Los 11 pasos reales con el Stellar CLI, con comandos y transacciones. Y abajo, ejecútalo tú mismo
+                Los {CLI_STEPS} pasos reales con el Stellar CLI, con comandos y transacciones. Y abajo, ejecútalo tú mismo
                 desde el navegador.
               </p>
             </Link>
@@ -184,21 +193,11 @@ export default function AexPassSummary() {
                 <span>
                   <span className="sr-only">{item.done ? "Hecho: " : "Pendiente: "}</span>
                   <span className={item.done ? "" : "text-muted"}>{item.text}</span>
-                  {item.link &&
-                    (item.link.href.startsWith("http") ? (
-                      <a
-                        href={item.link.href}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="mt-0.5 block font-medium text-accent hover:underline"
-                      >
-                        {item.link.label} ↗
-                      </a>
-                    ) : (
-                      <Link href={item.link.href} className="mt-0.5 block font-medium text-accent hover:underline">
-                        {item.link.label} →
-                      </Link>
-                    ))}
+                  {item.link && (
+                    <SmartLink href={item.link.href} className="mt-0.5 block font-medium text-accent hover:underline">
+                      {item.link.label}
+                    </SmartLink>
+                  )}
                 </span>
               </li>
             ))}

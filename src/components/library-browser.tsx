@@ -1,8 +1,17 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { EntryCard } from "@/components/cards";
-import { KINDS, KIND_ORDER, byOrder, library, type Kind } from "@/content/lab";
+import { Suspense, useMemo, useState, type ReactNode } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { KINDS, KIND_ORDER, type Kind } from "@/content/schema";
+
+/** Lo mínimo para filtrar: las tarjetas ya vienen renderizadas desde el servidor. */
+export type IndexEntry = { id: string; kind: Kind; week: number; text: string };
+
+type Props = {
+  index: IndexEntry[];
+  /** Tarjeta de cada entrada, por id, ya ordenadas dentro de su sección. */
+  cards: Record<string, ReactNode>;
+};
 
 function normalize(text: string) {
   return text
@@ -10,8 +19,6 @@ function normalize(text: string) {
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "");
 }
-
-const WEEKS = [...new Set(library.map((e) => e.week))].sort((a, b) => a - b);
 
 function Chip({
   active,
@@ -21,7 +28,7 @@ function Chip({
 }: {
   active: boolean;
   onClick: () => void;
-  children: React.ReactNode;
+  children: ReactNode;
   count: number;
 }) {
   return (
@@ -39,45 +46,27 @@ function Chip({
   );
 }
 
-export function LibraryBrowser({
-  initialKind,
-  initialWeek,
-}: {
-  initialKind: Kind | null;
-  initialWeek: number | null;
+function LibraryView({
+  index,
+  cards,
+  kind,
+  week,
+  onFilter,
+}: Props & {
+  kind: Kind | null;
+  week: number | null;
+  onFilter: (kind: Kind | null, week: number | null) => void;
 }) {
-  const [kind, setKind] = useState<Kind | null>(initialKind);
-  const [week, setWeek] = useState<number | null>(initialWeek);
   const [query, setQuery] = useState("");
-
-  const sync = (nextKind: Kind | null, nextWeek: number | null) => {
-    // La URL refleja los filtros para poder compartirlos.
-    const params = new URLSearchParams();
-    if (nextKind) params.set("tipo", nextKind);
-    if (nextWeek) params.set("semana", String(nextWeek));
-    const qs = params.toString();
-    window.history.replaceState(null, "", qs ? `/biblioteca?${qs}` : "/biblioteca");
-  };
-  const selectKind = (next: Kind | null) => {
-    setKind(next);
-    sync(next, week);
-  };
-  const selectWeek = (next: number | null) => {
-    setWeek(next);
-    sync(kind, next);
-  };
+  const weeks = useMemo(() => [...new Set(index.map((e) => e.week))].sort((a, b) => a - b), [index]);
 
   const matches = useMemo(() => {
     const q = normalize(query.trim());
-    return library.filter(
-      (e) =>
-        (!week || e.week === week) &&
-        (!q || normalize([e.title, e.summary, e.author ?? "", ...e.tags].join(" ")).includes(q)),
-    );
-  }, [week, query]);
+    return index.filter((e) => (!week || e.week === week) && (!q || normalize(e.text).includes(q)));
+  }, [index, week, query]);
 
   const groups = KIND_ORDER.filter((k) => !kind || k === kind)
-    .map((k) => ({ kind: k, entries: matches.filter((e) => e.kind === k).sort(byOrder) }))
+    .map((k) => ({ kind: k, entries: matches.filter((e) => e.kind === k) }))
     .filter((g) => g.entries.length > 0);
   const total = groups.reduce((n, g) => n + g.entries.length, 0);
 
@@ -86,14 +75,14 @@ export function LibraryBrowser({
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div role="group" aria-label="Filtrar por sección" className="flex flex-wrap gap-2">
-            <Chip active={kind === null} onClick={() => selectKind(null)} count={matches.length}>
+            <Chip active={kind === null} onClick={() => onFilter(null, week)} count={matches.length}>
               Todo
             </Chip>
             {KIND_ORDER.map((k) => (
               <Chip
                 key={k}
                 active={kind === k}
-                onClick={() => selectKind(k)}
+                onClick={() => onFilter(k, week)}
                 count={matches.filter((e) => e.kind === k).length}
               >
                 {KINDS[k].many}
@@ -113,16 +102,11 @@ export function LibraryBrowser({
         </div>
         <div role="group" aria-label="Filtrar por semana" className="flex flex-wrap items-center gap-2">
           <span className="text-sm text-muted">Semana:</span>
-          <Chip active={week === null} onClick={() => selectWeek(null)} count={library.length}>
+          <Chip active={week === null} onClick={() => onFilter(kind, null)} count={index.length}>
             Todas
           </Chip>
-          {WEEKS.map((w) => (
-            <Chip
-              key={w}
-              active={week === w}
-              onClick={() => selectWeek(w)}
-              count={library.filter((e) => e.week === w).length}
-            >
+          {weeks.map((w) => (
+            <Chip key={w} active={week === w} onClick={() => onFilter(kind, w)} count={index.filter((e) => e.week === w).length}>
               {w}
             </Chip>
           ))}
@@ -150,7 +134,7 @@ export function LibraryBrowser({
               </div>
               <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {group.entries.map((entry) => (
-                  <EntryCard key={entry.id} entry={entry} />
+                  <div key={entry.id}>{cards[entry.id]}</div>
                 ))}
               </div>
             </section>
@@ -158,5 +142,35 @@ export function LibraryBrowser({
         </div>
       )}
     </div>
+  );
+}
+
+/** Los filtros viven en la URL (`?tipo=&semana=`), así se pueden compartir y el menú los reinicia. */
+function LibraryFromUrl(props: Props) {
+  const params = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const tipo = params.get("tipo");
+  const kind = KIND_ORDER.includes(tipo as Kind) ? (tipo as Kind) : null;
+  const semana = Number(params.get("semana"));
+  const week = props.index.some((e) => e.week === semana) ? semana : null;
+
+  const onFilter = (nextKind: Kind | null, nextWeek: number | null) => {
+    const next = new URLSearchParams();
+    if (nextKind) next.set("tipo", nextKind);
+    if (nextWeek) next.set("semana", String(nextWeek));
+    const qs = next.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  };
+
+  return <LibraryView {...props} kind={kind} week={week} onFilter={onFilter} />;
+}
+
+export function LibraryBrowser(props: Props) {
+  // Mientras se leen los filtros de la URL (y en el HTML estático) se ve todo.
+  return (
+    <Suspense fallback={<LibraryView {...props} kind={null} week={null} onFilter={() => {}} />}>
+      <LibraryFromUrl {...props} />
+    </Suspense>
   );
 }

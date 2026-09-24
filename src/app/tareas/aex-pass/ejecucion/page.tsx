@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
-import { AexPass } from "@/components/aex-pass";
-import { HowIDidIt } from "@/components/how-i-did-it";
+import { AexPass } from "@/components/aex-pass/aex-pass";
+import { CLI_STEPS, HowIDidIt } from "@/components/how-i-did-it";
+
+// La lectura en vivo del contrato original se hace en el servidor y se renueva
+// cada 5 minutos.
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Aex Pass · Ejecución",
-  description: "Los 11 pasos reales con el Stellar CLI y el mismo flujo para ejecutarlo desde el navegador.",
+  description: `Los ${CLI_STEPS} pasos reales con el Stellar CLI y el mismo flujo para ejecutarlo desde el navegador.`,
 };
 
 export default function AexPassExecution() {
@@ -15,7 +19,7 @@ export default function AexPassExecution() {
           Lo que ejecuté con el Stellar CLI
         </h2>
         <p className="mt-2 max-w-3xl leading-relaxed text-muted">
-          Los 11 pasos reales, del primer comando al estado final: qué escribí en la terminal, qué hace y qué
+          Los {CLI_STEPS} pasos reales, del primer comando al estado final: qué escribí en la terminal, qué hace y qué
           quedó registrado en la blockchain.
         </p>
         <div className="mt-8">

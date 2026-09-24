@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { EntryCard, TaskCard } from "@/components/cards";
-import { KINDS, KIND_ORDER, byOrder, library, site, tasks } from "@/content/lab";
+import { library } from "@/content/library";
+import { KINDS, KIND_ORDER, byOrder, site } from "@/content/schema";
+import { tasks } from "@/content/tasks";
 
 export default function Home() {
   const classes = library.filter((e) => e.kind === "clase").sort(byOrder);

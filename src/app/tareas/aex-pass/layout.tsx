@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { StatusBadge } from "@/components/cards";
 import { TaskTabs } from "@/components/task-tabs";
-import { formatDate, tasks } from "@/content/lab";
+import { formatDate } from "@/content/schema";
+import { taskBySlug } from "@/content/tasks";
 
-const task = tasks.find((t) => t.slug === "aex-pass")!;
+const task = taskBySlug("aex-pass");
 
 export default function AexPassLayout({ children }: LayoutProps<"/tareas/aex-pass">) {
   return (
@@ -13,7 +14,7 @@ export default function AexPassLayout({ children }: LayoutProps<"/tareas/aex-pas
           <Link href="/tareas" className="hover:text-text">
             Tareas
           </Link>{" "}
-          / <span className="text-text">Aex Pass</span>
+          / <span className="text-text">{task.project}</span>
         </nav>
         <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
           <StatusBadge task={task} />
@@ -21,10 +22,8 @@ export default function AexPassLayout({ children }: LayoutProps<"/tareas/aex-pas
             Track {task.track} · Entrega: {formatDate(task.due)}
           </span>
         </div>
-        <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Aex Pass</h1>
-        <p className="mt-2 max-w-2xl text-lg leading-relaxed text-muted">
-          Un pase para entrar a un Meet que no se puede usar dos veces, controlado por un contrato en Stellar.
-        </p>
+        <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">{task.project}</h1>
+        <p className="mt-2 max-w-2xl text-lg leading-relaxed text-muted">{task.pitch}</p>
         <div className="mt-6">
           <TaskTabs
             base="/tareas/aex-pass"

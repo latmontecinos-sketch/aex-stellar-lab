@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
-import { LibraryBrowser } from "@/components/library-browser";
-import { KIND_ORDER, library, type Kind } from "@/content/lab";
+import { EntryCard } from "@/components/cards";
+import { LibraryBrowser, type IndexEntry } from "@/components/library-browser";
+import { library } from "@/content/library";
+import { KIND_ORDER, byOrder } from "@/content/schema";
 
 export const metadata: Metadata = {
   title: "Biblioteca",
@@ -8,12 +10,18 @@ export const metadata: Metadata = {
     "Clases, apuntes, documentación, repositorios, skills, herramientas, lecturas y oportunidades de lo que voy aprendiendo en Stellar.",
 };
 
-export default async function BibliotecaPage({ searchParams }: PageProps<"/biblioteca">) {
-  const { tipo, semana } = await searchParams;
-  const initialKind = KIND_ORDER.includes(tipo as Kind) ? (tipo as Kind) : null;
-  const weekNumber = Number(semana);
-  const initialWeek = library.some((e) => e.week === weekNumber) ? weekNumber : null;
+// Ordenadas una vez en el servidor: por sección y, dentro de cada una, por `order`.
+const sorted = KIND_ORDER.flatMap((kind) => library.filter((e) => e.kind === kind).sort(byOrder));
 
+const index: IndexEntry[] = sorted.map((e) => ({
+  id: e.id,
+  kind: e.kind,
+  week: e.week,
+  text: [e.title, e.summary, e.author ?? "", ...e.tags].join(" "),
+}));
+
+export default function BibliotecaPage() {
+  const cards = Object.fromEntries(sorted.map((entry) => [entry.id, <EntryCard key={entry.id} entry={entry} />]));
   return (
     <>
       <section className="py-10 sm:py-12">
@@ -24,7 +32,7 @@ export default async function BibliotecaPage({ searchParams }: PageProps<"/bibli
           dice en qué semana llegó.
         </p>
       </section>
-      <LibraryBrowser initialKind={initialKind} initialWeek={initialWeek} />
+      <LibraryBrowser index={index} cards={cards} />
     </>
   );
 }

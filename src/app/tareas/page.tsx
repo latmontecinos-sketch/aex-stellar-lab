@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { TaskCard } from "@/components/cards";
-import { tasks } from "@/content/lab";
+import { tasks } from "@/content/tasks";
 
 export const metadata: Metadata = {
   title: "Tareas",

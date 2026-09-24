@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { CONTRACT_ERRORS, CONTRACT_SOURCE, ORIGINAL, TTL_DAYS } from "@/lib/deployment";
+import { formatXlm } from "@/lib/format";
+import { Mono } from "@/components/ui";
 
 export const metadata: Metadata = {
   title: "Aex Pass · Cómo funciona",
@@ -45,12 +48,8 @@ const functions = [
   },
 ];
 
-const errors = [
-  { code: 1, name: "InvalidPrice", when: "Se intenta crear el evento con un precio de cero o menos." },
-  { code: 2, name: "AlreadyBought", when: "Una cuenta que ya tiene pase intenta comprar otro." },
-  { code: 3, name: "NoPass", when: "El anfitrión intenta dejar entrar a alguien que no compró." },
-  { code: 4, name: "AlreadyUsed", when: "Se intenta usar un pase que ya se usó." },
-];
+const errors = Object.entries(CONTRACT_ERRORS).map(([code, error]) => ({ code: Number(code), ...error }));
+const price = `${formatXlm(ORIGINAL.priceStroops)} XLM`;
 
 const glossary = [
   { term: "Blockchain", text: "Un registro público y compartido que nadie puede editar a escondidas. Stellar es una blockchain." },
@@ -78,10 +77,6 @@ function Section({ id, title, children }: { id: string; title: string; children:
       <div className="mt-4">{children}</div>
     </section>
   );
-}
-
-function Mono({ children }: { children: ReactNode }) {
-  return <code className="font-mono text-[0.9em]">{children}</code>;
 }
 
 function StateBox({ label, tone }: { label: string; tone: "idle" | "accent" | "ok" | "bad" }) {
@@ -192,7 +187,7 @@ export default function AexPassExplanation() {
           <div className="mt-5 rounded-2xl border border-border bg-surface p-5">
             <div className="grid items-center gap-1 md:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr]">
               <StateBox label="Sin pase" tone="idle" />
-              <Arrow action="buy" detail="firma el invitado · paga 1 XLM" />
+              <Arrow action="buy" detail={`firma el invitado · paga ${price}`} />
               <StateBox label="Comprado" tone="accent" />
               <Arrow action="check_in" detail="firma el anfitrión" />
               <StateBox label="Usado" tone="ok" />
@@ -237,7 +232,7 @@ export default function AexPassExplanation() {
             El contrato está escrito en Rust con <Mono>soroban-sdk</Mono>, compilado a WebAssembly y publicado en
             Stellar testnet. El código completo tiene unas 160 líneas y está en{" "}
             <a
-              href="https://github.com/latmontecinos-sketch/aex-pass/blob/main/src/lib.rs"
+              href={CONTRACT_SOURCE}
               target="_blank"
               rel="noreferrer"
               className="font-medium text-accent hover:underline"
@@ -315,9 +310,9 @@ export default function AexPassExplanation() {
           </p>
           <dl className="mt-5 grid gap-3 sm:grid-cols-4">
             {[
-              { label: "Desplegar", value: "0,011 XLM" },
-              { label: "Comprar", value: "17,64 XLM" },
-              { label: "Check-in", value: "0,00076 XLM" },
+              { label: "Desplegar", value: `${formatXlm(ORIGINAL.deploy.feeStroops, 3)} XLM` },
+              { label: "Comprar", value: `${formatXlm(ORIGINAL.buy.feeStroops, 2)} XLM` },
+              { label: "Check-in", value: `${formatXlm(ORIGINAL.checkIn.feeStroops, 5)} XLM` },
               { label: "Leer", value: "Gratis" },
             ].map((item) => (
               <div key={item.label} className="rounded-2xl border border-border bg-surface p-4">
@@ -329,7 +324,7 @@ export default function AexPassExplanation() {
           <p className="mt-4 leading-relaxed text-muted">
             ¿Por qué la compra costó tanto? Guardar datos en la red cuesta <strong className="text-text">renta</strong>,
             y cada dato tiene un tiempo de vida (<strong className="text-text">TTL</strong>). <Mono>buy</Mono>{" "}
-            extiende ese tiempo a 120 días para el pase, el contrato y su código, y casi toda la comisión fue esa
+            extiende ese tiempo a {TTL_DAYS} días para el pase, el contrato y su código, y casi toda la comisión fue esa
             renta. Es XLM de prueba, pero la lección es real: el plazo hay que ajustarlo a la duración del evento.
           </p>
         </Section>

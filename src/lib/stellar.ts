@@ -1,43 +1,33 @@
-import {
-  Horizon,
-  Keypair,
-  Networks,
-  contract,
-  rpc,
-  scValToNative,
-} from "@stellar/stellar-sdk";
+// Todo lo que toca la red Stellar. Solo testnet: las cuentas y el XLM son de prueba.
+// Este módulo carga el SDK completo, así que la interfaz lo importa con `import()`
+// recién cuando hace falta.
+import { Horizon, Keypair, Networks, contract, rpc, scValToNative } from "@stellar/stellar-sdk";
+import { AexPassClient, type DeployArgs } from "./aex-pass-contract.ts";
+import { FRIENDBOT_URL, HORIZON_URL, RPC_URL, WASM_HASH, XLM_CONTRACT, contractError } from "./deployment.ts";
+import { stroopsFromDecimal } from "./format.ts";
 
-// Todo corre contra testnet: las cuentas y el XLM son de prueba.
-export const NETWORK_PASSPHRASE = Networks.TESTNET;
-export const RPC_URL = "https://soroban-testnet.stellar.org";
-export const HORIZON_URL = "https://horizon-testnet.stellar.org";
-export const EXPLORER = "https://stellar.expert/explorer/testnet";
-
-// Código del contrato Aex Prueba Pass Stellar 01, ya subido a la red. Cada
-// evento que se crea aquí es una instancia nueva de este mismo código.
-export const WASM_HASH =
-  "bbc3d152adfe968892e0c7b96625617443c81694bef47d04b569665205967379";
-// El XLM nativo expuesto como contrato (Stellar Asset Contract).
-export const XLM_CONTRACT =
-  "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC";
-// La primera instancia, desplegada e invocada desde el Stellar CLI.
-export const ORIGINAL_CONTRACT =
-  "CCGIRQW6WUR4WT46DTL2EZMQBCY4SNRF622DN2VODMOYGMSFHMDPP6NW";
-
-export const STROOPS_PER_XLM = 10_000_000n;
-
-export const CONTRACT_ERRORS: Record<number, { name: string; meaning: string }> = {
-  1: { name: "InvalidPrice", meaning: "el precio tiene que ser mayor a cero" },
-  2: { name: "AlreadyBought", meaning: "esta cuenta ya compró su pase" },
-  3: { name: "NoPass", meaning: "esta cuenta no tiene pase" },
-  4: { name: "AlreadyUsed", meaning: "este pase ya se usó" },
-};
+// La red es fija. No hay entrada del usuario que pueda cambiarla, y este módulo
+// nunca debe apuntar a mainnet: firma con llaves guardadas en el navegador.
+const NETWORK_PASSPHRASE = Networks.TESTNET;
 
 export type PassStatus = "none" | "bought" | "used";
+export type Account = { publicKey: string; secret: string };
 
 export type TxOutcome =
-  | { ok: true; hash: string; feeXlm: string | null }
-  | { ok: false; code: number | null; message: string };
+  | { ok: true; hash: string; feeStroops: bigint | null }
+  | {
+      ok: false;
+      /** Código del error del contrato (#1…#4), si fue el contrato el que rechazó. */
+      code: number | null;
+      message: string;
+      /** Hash de la transacción, si llegó a enviarse. */
+      hash?: string;
+      /** La red recibió la transacción pero todavía no la confirma. */
+      pending?: boolean;
+    };
+
+/** El resultado de una lectura: o el dato, o por qué no se pudo leer. */
+export type Read<T> = { ok: true; value: T } | { ok: false; message: string };
 
 export type ContractEvent = {
   id: string;
@@ -48,181 +38,252 @@ export type ContractEvent = {
   txHash: string;
 };
 
+/** Se llama con el hash apenas la transacción está firmada, antes de esperar la confirmación. */
+export type OnSubmitted = (hash: string) => void;
+
 const server = new rpc.Server(RPC_URL);
 const horizon = new Horizon.Server(HORIZON_URL);
 
-export function short(address: string): string {
-  return `${address.slice(0, 4)}…${address.slice(-4)}`;
+function messageOf(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
 
-export function formatXlm(stroops: bigint | string | number): string {
-  const value = BigInt(stroops);
-  const whole = value / STROOPS_PER_XLM;
-  const fraction = (value % STROOPS_PER_XLM).toString().padStart(7, "0").replace(/0+$/, "");
-  return fraction ? `${whole}.${fraction}` : `${whole}`;
+function signerOptions(secret: string) {
+  const keypair = Keypair.fromSecret(secret);
+  return { publicKey: keypair.publicKey(), ...contract.basicNodeSigner(keypair, NETWORK_PASSPHRASE) };
 }
 
-export function xlmToStroops(xlm: string): bigint {
-  const [whole, fraction = ""] = xlm.trim().replace(",", ".").split(".");
-  return BigInt(whole || "0") * STROOPS_PER_XLM + BigInt(fraction.padEnd(7, "0").slice(0, 7) || "0");
-}
-
-/** Crea una cuenta nueva y le pide XLM de prueba a Friendbot. */
-export async function createFundedAccount(): Promise<Keypair> {
-  const keypair = Keypair.random();
-  const res = await fetch(`https://friendbot.stellar.org/?addr=${keypair.publicKey()}`);
-  if (!res.ok) throw new Error("Friendbot no pudo fondear la cuenta. Intenta de nuevo en unos segundos.");
-  return keypair;
-}
-
-export async function getXlmBalance(address: string): Promise<string | null> {
-  try {
-    const account = await horizon.loadAccount(address);
-    const native = account.balances.find((b) => b.asset_type === "native");
-    return native ? native.balance : null;
-  } catch {
-    return null;
-  }
-}
-
-function clientOptions(contractId: string, signer?: Keypair): contract.ClientOptions {
-  return {
+function client(contractId: string, signerSecret?: string): AexPassClient {
+  return new AexPassClient({
     contractId,
     rpcUrl: RPC_URL,
     networkPassphrase: NETWORK_PASSPHRASE,
-    ...(signer
-      ? { publicKey: signer.publicKey(), ...contract.basicNodeSigner(signer, NETWORK_PASSPHRASE) }
-      : {}),
-  };
+    ...(signerSecret ? signerOptions(signerSecret) : {}),
+  });
 }
 
-// La interfaz del contrato se lee de la red una sola vez.
-let specCache: contract.Spec | null = null;
-async function getClient(contractId: string, signer?: Keypair) {
-  if (!specCache) {
-    const probe = await contract.Client.fromWasmHash(WASM_HASH, clientOptions(contractId));
-    specCache = probe.spec;
+function failure(error: unknown, hash?: string): Extract<TxOutcome, { ok: false }> {
+  const message = messageOf(error);
+  const match = /Error\(Contract, #(\d+)\)/.exec(message);
+  const code = match ? Number(match[1]) : null;
+  return { ok: false, code, message: contractError(code)?.meaning ?? message, hash };
+}
+
+/** Crea una cuenta nueva y le pide XLM de prueba a Friendbot. */
+export async function createFundedAccount(): Promise<Account> {
+  const keypair = Keypair.random();
+  const res = await fetch(`${FRIENDBOT_URL}/?addr=${keypair.publicKey()}`);
+  if (!res.ok) throw new Error("Friendbot no pudo fondear la cuenta. Intenta de nuevo en unos segundos.");
+  return { publicKey: keypair.publicKey(), secret: keypair.secret() };
+}
+
+export function publicKeyOf(secret: string): string {
+  return Keypair.fromSecret(secret).publicKey();
+}
+
+/** Saldo en XLM nativo, en stroops. */
+export async function getXlmBalance(address: string): Promise<Read<bigint>> {
+  try {
+    const account = await horizon.loadAccount(address);
+    const native = account.balances.find((b) => b.asset_type === "native");
+    if (!native) return { ok: false, message: "La cuenta no tiene saldo en XLM." };
+    return { ok: true, value: stroopsFromDecimal(native.balance) };
+  } catch (error) {
+    return { ok: false, message: messageOf(error) };
   }
-  // Los métodos se generan desde el spec; se tipan a mano abajo.
-  return new contract.Client(specCache, clientOptions(contractId, signer)) as contract.Client &
-    Record<string, (args?: Record<string, unknown>) => Promise<contract.AssembledTransaction<unknown>>>;
 }
 
-function contractErrorCode(text: string): number | null {
-  const match = /Error\(Contract, #(\d+)\)/.exec(text);
-  return match ? Number(match[1]) : null;
-}
-
-function describeFailure(error: unknown): TxOutcome {
-  const text = error instanceof Error ? error.message : String(error);
-  const code = contractErrorCode(text);
-  return { ok: false, code, message: code ? CONTRACT_ERRORS[code]?.meaning ?? text : text };
-}
-
-async function feeOf(hash: string): Promise<string | null> {
+async function feeOf(hash: string): Promise<bigint | null> {
+  // Horizon puede ir unos segundos detrás del RPC: si todavía no la tiene, la
+  // comisión queda sin mostrar, pero la transacción sí está confirmada.
   try {
     const tx = await horizon.transactions().transaction(hash).call();
-    return formatXlm(tx.fee_charged);
+    return BigInt(tx.fee_charged);
   } catch {
     return null;
   }
 }
 
-async function send(tx: contract.AssembledTransaction<unknown>): Promise<TxOutcome> {
+/**
+ * Firma, envía y espera la confirmación. Solo cuenta como hecha si la red
+ * responde SUCCESS: que el SDK no lance error no alcanza.
+ */
+async function submit<T>(
+  tx: contract.AssembledTransaction<T>,
+  onSubmitted?: OnSubmitted,
+): Promise<{ outcome: TxOutcome; sent?: contract.SentTransaction<T> }> {
   // Si la simulación falla, la transacción nunca se envía a la red.
   if (tx.simulation && rpc.Api.isSimulationError(tx.simulation)) {
-    return describeFailure(tx.simulation.error);
+    return { outcome: failure(tx.simulation.error) };
   }
+  let hash: string | undefined;
   try {
-    const sent = await tx.signAndSend();
-    const hash =
-      sent.getTransactionResponse?.txHash ?? sent.sendTransactionResponse?.hash ?? "";
-    return { ok: true, hash, feeXlm: hash ? await feeOf(hash) : null };
+    await tx.sign();
+    const signedHash = tx.signed?.hash();
+    // `hash()` devuelve bytes; Buffer no existe en el navegador.
+    hash = signedHash ? Array.from(signedHash, (b) => b.toString(16).padStart(2, "0")).join("") : undefined;
+    if (hash) onSubmitted?.(hash);
+    const sent = await tx.send();
+    const response = sent.getTransactionResponse;
+    hash = hash ?? sent.sendTransactionResponse?.hash;
+    if (response?.status !== rpc.Api.GetTransactionStatus.SUCCESS) {
+      return {
+        outcome: {
+          ok: false,
+          code: null,
+          message: "La red recibió la transacción, pero falló al aplicarse.",
+          hash,
+        },
+      };
+    }
+    return { outcome: { ok: true, hash: response.txHash, feeStroops: await feeOf(response.txHash) }, sent };
   } catch (error) {
-    return describeFailure(error);
+    if (error instanceof contract.SentTransaction.Errors.TransactionStillPending) {
+      return {
+        outcome: {
+          ok: false,
+          code: null,
+          message: "La red todavía no confirma la transacción. Recarga en un minuto para ver si entró.",
+          hash,
+          pending: true,
+        },
+      };
+    }
+    return { outcome: failure(error, hash) };
   }
 }
 
 /** Despliega una instancia nueva del contrato: un evento con su anfitrión, precio y nombre. */
 export async function deployEvent(
-  host: Keypair,
+  hostSecret: string,
   name: string,
   priceStroops: bigint,
+  onSubmitted?: OnSubmitted,
 ): Promise<{ contractId: string; outcome: TxOutcome; ledger: number | null }> {
-  const tx = await contract.Client.deploy(
-    { host: host.publicKey(), token: XLM_CONTRACT, price: priceStroops, name },
-    {
+  const signer = signerOptions(hostSecret);
+  const args: DeployArgs = { host: signer.publicKey, token: XLM_CONTRACT, price: priceStroops, name };
+  try {
+    const tx = await contract.Client.deploy<contract.Client>(args, {
       wasmHash: WASM_HASH,
       rpcUrl: RPC_URL,
       networkPassphrase: NETWORK_PASSPHRASE,
-      publicKey: host.publicKey(),
-      ...contract.basicNodeSigner(host, NETWORK_PASSPHRASE),
-    },
-  );
-  if (tx.simulation && rpc.Api.isSimulationError(tx.simulation)) {
-    return { contractId: "", outcome: describeFailure(tx.simulation.error), ledger: null };
-  }
-  try {
-    const sent = await tx.signAndSend();
-    const deployed = sent.result as contract.Client;
+      ...signer,
+    });
+    const { outcome, sent } = await submit(tx, onSubmitted);
+    if (!outcome.ok || !sent) return { contractId: "", outcome, ledger: null };
     const response = sent.getTransactionResponse;
-    const hash = response?.txHash ?? sent.sendTransactionResponse?.hash ?? "";
-    const ledger = response && "ledger" in response ? (response.ledger as number) : null;
     return {
-      contractId: deployed.options.contractId,
-      outcome: { ok: true, hash, feeXlm: hash ? await feeOf(hash) : null },
-      ledger,
+      contractId: sent.result.options.contractId,
+      outcome,
+      ledger: response?.status === rpc.Api.GetTransactionStatus.SUCCESS ? response.ledger : null,
     };
   } catch (error) {
-    return { contractId: "", outcome: describeFailure(error), ledger: null };
+    return { contractId: "", outcome: failure(error), ledger: null };
   }
 }
 
-export async function buyPass(contractId: string, buyer: Keypair): Promise<TxOutcome> {
-  const client = await getClient(contractId, buyer);
-  return send(await client.buy({ buyer: buyer.publicKey() }));
+export async function buyPass(contractId: string, buyerSecret: string, onSubmitted?: OnSubmitted): Promise<TxOutcome> {
+  try {
+    const buyer = publicKeyOf(buyerSecret);
+    return (await submit(await client(contractId, buyerSecret).buy({ buyer }), onSubmitted)).outcome;
+  } catch (error) {
+    return failure(error);
+  }
 }
 
-export async function checkIn(contractId: string, host: Keypair, buyer: string): Promise<TxOutcome> {
-  const client = await getClient(contractId, host);
-  return send(await client.check_in({ buyer }));
+export async function checkIn(
+  contractId: string,
+  hostSecret: string,
+  buyer: string,
+  onSubmitted?: OnSubmitted,
+): Promise<TxOutcome> {
+  try {
+    return (await submit(await client(contractId, hostSecret).check_in({ buyer }), onSubmitted)).outcome;
+  } catch (error) {
+    return failure(error);
+  }
 }
 
+export type TxResolution =
+  | { status: "success"; ledger: number; feeStroops: bigint | null; returned: unknown }
+  | { status: "failed" }
+  | { status: "not_found" };
+
+/**
+ * Qué pasó con una transacción enviada antes, por ejemplo si la página se cerró
+ * mientras esperaba. `returned` es lo que devolvió; en un despliegue, la
+ * dirección del contrato nuevo.
+ */
+export async function resolveTx(hash: string): Promise<TxResolution> {
+  const res = await server.getTransaction(hash);
+  if (res.status === rpc.Api.GetTransactionStatus.SUCCESS) {
+    return {
+      status: "success",
+      ledger: res.ledger,
+      feeStroops: await feeOf(hash),
+      returned: res.returnValue ? (scValToNative(res.returnValue) as unknown) : null,
+    };
+  }
+  if (res.status === rpc.Api.GetTransactionStatus.FAILED) return { status: "failed" };
+  return { status: "not_found" };
+}
+
+/** Lanza un error si no se puede leer: quien llama decide cómo mostrarlo. */
 export async function getPassStatus(contractId: string, buyer: string): Promise<PassStatus> {
-  const client = await getClient(contractId);
-  const tx = await client.pass_of({ buyer });
-  const value = tx.result as unknown;
-  // Option<PassStatus>: undefined/null si no hay pase; si hay, { tag: "Bought" | "Used" }.
-  const tag =
-    value && typeof value === "object" && "tag" in value ? (value as { tag: string }).tag : value;
+  const tx = await client(contractId).pass_of({ buyer });
+  if (tx.simulation && rpc.Api.isSimulationError(tx.simulation)) throw new Error(tx.simulation.error);
+  const tag = tx.result?.tag;
   if (tag === "Bought") return "bought";
   if (tag === "Used") return "used";
   return "none";
 }
 
-/** Eventos publicados por el contrato: `bought` y `checked_in`. */
-export async function getContractEvents(contractId: string, fromLedger: number): Promise<ContractEvent[]> {
+function decodeEvent(event: rpc.Api.EventResponse): ContractEvent {
+  const topics = event.topic.map((t) => scValToNative(t) as unknown);
+  const data = scValToNative(event.value) as unknown;
+  const price =
+    data !== null && typeof data === "object" && "price" in data && typeof data.price === "bigint" ? data.price : null;
+  return {
+    id: event.id,
+    name: String(topics[0]),
+    buyer: String(topics[1] ?? ""),
+    price,
+    ledger: event.ledger,
+    txHash: event.txHash,
+  };
+}
+
+// El RPC revisa como mucho unos 10.000 ledgers por consulta y solo guarda los
+// últimos 7 días. El cursor dice hasta qué ledger revisó.
+function ledgerOfCursor(cursor: string): number {
+  return Number(BigInt(cursor.split("-")[0]) >> 32n);
+}
+
+/**
+ * Eventos publicados por el contrato (`bought` y `checked_in`), recorriendo
+ * todas las páginas desde `fromLedger`. `truncated` avisa si parte de ese
+ * rango ya salió de la ventana que guarda el RPC.
+ */
+export async function getContractEvents(
+  contractId: string,
+  fromLedger: number,
+): Promise<Read<{ events: ContractEvent[]; truncated: boolean }>> {
+  const filters: rpc.Api.EventFilter[] = [{ type: "contract", contractIds: [contractId] }];
+  const limit = 100;
   try {
-    const res = await server.getEvents({
-      startLedger: fromLedger,
-      filters: [{ type: "contract", contractIds: [contractId] }],
-      limit: 50,
-    });
-    return res.events.map((event) => {
-      const topics = event.topic.map((t) => scValToNative(t));
-      const data = scValToNative(event.value) as Record<string, unknown> | null;
-      const price = data && typeof data === "object" && "price" in data ? BigInt(data.price as bigint) : null;
-      return {
-        id: event.id,
-        name: String(topics[0]),
-        buyer: String(topics[1] ?? ""),
-        price,
-        ledger: event.ledger,
-        txHash: event.txHash,
-      };
-    });
-  } catch {
-    return [];
+    const { oldestLedger } = await server.getHealth();
+    const events: ContractEvent[] = [];
+    let res = await server.getEvents({ startLedger: Math.max(fromLedger, oldestLedger), filters, limit });
+    // Tope de páginas por si el RPC dejara de avanzar el cursor.
+    for (let page = 0; page < 30; page++) {
+      events.push(...res.events.map(decodeEvent));
+      const reachedEnd = res.events.length < limit && ledgerOfCursor(res.cursor) >= res.latestLedger;
+      if (reachedEnd || !res.cursor) break;
+      res = await server.getEvents({ cursor: res.cursor, filters, limit });
+    }
+    return { ok: true, value: { events, truncated: fromLedger < oldestLedger } };
+  } catch (error) {
+    return { ok: false, message: messageOf(error) };
   }
 }
 

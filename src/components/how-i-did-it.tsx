@@ -1,24 +1,34 @@
 import type { ReactNode } from "react";
-import { EXPLORER, ORIGINAL_CONTRACT, WASM_HASH, XLM_CONTRACT, short } from "@/lib/stellar";
+import {
+  CONTRACT_SOURCE,
+  CONTRACT_TESTS,
+  ORIGINAL,
+  TTL_DAYS,
+  WASM_BYTES,
+  WASM_HASH,
+  XLM_CONTRACT,
+  contractError,
+  explorer,
+} from "@/lib/deployment";
+import { formatXlm } from "@/lib/format";
 import { OriginalLiveStatus } from "@/components/original-live-status";
+import { AddressLink, CodeBlock, Mono, ResultBox, TxLink, type Tone } from "@/components/ui";
 
-// Datos reales de la primera instancia, desplegada e invocada desde el Stellar CLI
-// el 22 de septiembre de 2026 (hora de Bolivia).
-const HOST = "GAAAGOVI3UD4E3BF4YG5EKEP7B36UG26YN6M2FOSC3LM5W37QFNN6SKK";
-const GUEST = "GA7KF4C26APK72OCBBEX23AM45GYYDYXCXRCAHI47APCLYWUHSEX2DJH";
-const TX = {
-  deploy: "de2cf14fa6a1548b1e4640f79287a6dffc919a346cd28f909ff15bbb4cc9ca56",
-  buy: "768aab930342ef4dc68fe35d15903768e7ec9eec90812e2c924a29d0070d3645",
-  checkIn: "1cfcb96f7c1c5d91d4510d8a22045d14cc6be39e79078d55d27878e37c09d367",
-};
+// Los pasos que ejecuté con el Stellar CLI el 22 de septiembre de 2026 (hora
+// de Bolivia). Los datos salen de `lib/deployment.ts`.
+/** Cuántos pasos tiene este recorrido (las páginas lo citan). */
+export const CLI_STEPS = 11;
+
 const CLI = "stellar contract invoke --id aex-prueba-pass-stellar-01";
+const alreadyUsed = contractError(4);
 
 const CONTRACT_SNIPPET = `pub fn buy(env: Env, buyer: Address) -> Result<(), Error> {
     buyer.require_auth();                          // firma del comprador
-    if ya_tiene_pase(&buyer) {
+    if storage.has(Pass(buyer)) {
         return Err(Error::AlreadyBought);          // un pase por cuenta
     }
-    guardar_pase(&buyer, PassStatus::Bought);
+    storage.set(Pass(buyer), PassStatus::Bought);
+    storage.extend_ttl(Pass(buyer), ${TTL_DAYS} días);     // renta: lo que más cuesta
     xlm.transfer(&buyer, &anfitrion, &precio);     // cobra y paga al anfitrión
     Bought { buyer, price }.publish(&env);         // evento "bought"
     Ok(())
@@ -26,18 +36,16 @@ const CONTRACT_SNIPPET = `pub fn buy(env: Env, buyer: Address) -> Result<(), Err
 
 pub fn check_in(env: Env, buyer: Address) -> Result<(), Error> {
     anfitrion.require_auth();                      // firma del anfitrión
-    match pase_de(&buyer) {
+    match storage.get(Pass(buyer)) {
         None => Err(Error::NoPass),                // error #3
         Some(PassStatus::Used) => Err(Error::AlreadyUsed), // error #4
         Some(PassStatus::Bought) => {
-            guardar_pase(&buyer, PassStatus::Used);
+            storage.set(Pass(buyer), PassStatus::Used);
             CheckedIn { buyer }.publish(&env);     // evento "checked_in"
             Ok(())
         }
     }
 }`;
-
-type Tone = "ok" | "bad" | "info";
 
 function Step({
   n,
@@ -56,9 +64,6 @@ function Step({
   tone?: Tone;
   commandLabel?: string;
 }) {
-  const toneClass =
-    tone === "ok" ? "bg-ok-soft" : tone === "bad" ? "bg-bad-soft" : "bg-surface-2";
-  const labelClass = tone === "ok" ? "text-ok" : tone === "bad" ? "text-bad" : "text-muted";
   return (
     <li className="relative rounded-2xl border border-border bg-surface p-5 sm:p-6">
       <div className="flex items-start gap-4">
@@ -77,40 +82,18 @@ function Step({
           {command && (
             <div className="mt-4">
               <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted">{commandLabel}</p>
-              <pre className="overflow-x-auto rounded-xl bg-code-bg p-4 font-mono text-xs leading-relaxed text-code-text">
-                {command}
-              </pre>
+              <CodeBlock>{command}</CodeBlock>
             </div>
           )}
           {result && (
-            <div className={`mt-3 rounded-xl px-4 py-3 text-sm ${toneClass}`}>
-              <p className={`mb-1 text-xs font-semibold uppercase tracking-wide ${labelClass}`}>
-                {tone === "bad" ? "Resultado: rechazado" : "Resultado"}
-              </p>
-              <div className="leading-relaxed">{result}</div>
+            <div className="mt-3">
+              <ResultBox tone={tone}>{result}</ResultBox>
             </div>
           )}
         </div>
       </div>
     </li>
   );
-}
-
-function TxLink({ hash, children }: { hash: string; children?: ReactNode }) {
-  return (
-    <a
-      href={`${EXPLORER}/tx/${hash}`}
-      target="_blank"
-      rel="noreferrer"
-      className="font-medium text-accent underline-offset-4 hover:underline"
-    >
-      {children ?? `tx ${hash.slice(0, 8)}…`} ↗
-    </a>
-  );
-}
-
-function Mono({ children }: { children: ReactNode }) {
-  return <code className="font-mono text-[0.9em]">{children}</code>;
 }
 
 function Phase({ title, text, children }: { title: string; text: string; children: ReactNode }) {
@@ -126,10 +109,7 @@ function Phase({ title, text, children }: { title: string; text: string; childre
 export function HowIDidIt() {
   return (
     <div className="max-w-4xl">
-      <Phase
-        title="1 · Preparar y escribir el contrato"
-        text="Todo en mi computadora, antes de tocar la red."
-      >
+      <Phase title="1 · Preparar y escribir el contrato" text="Todo en mi computadora, antes de tocar la red.">
         <Step
           n={1}
           title="Instalar las herramientas"
@@ -153,12 +133,7 @@ winget install Stellar.StellarCLI`}
             <>
               Un contrato de unas 160 líneas en Rust con <Mono>soroban-sdk</Mono>. El fragmento de arriba está
               simplificado; el código completo está en{" "}
-              <a
-                href="https://github.com/latmontecinos-sketch/aex-pass/blob/main/src/lib.rs"
-                target="_blank"
-                rel="noreferrer"
-                className="font-medium text-accent underline-offset-4 hover:underline"
-              >
+              <a href={CONTRACT_SOURCE} target="_blank" rel="noreferrer" className="font-medium text-accent underline-offset-4 hover:underline">
                 GitHub ↗
               </a>
               .
@@ -178,8 +153,10 @@ winget install Stellar.StellarCLI`}
           command="cargo test"
           result={
             <>
-              <strong>7 pruebas pasaron:</strong> compra, doble compra, check-in único, check-in sin pase,
-              check-in sin firma del anfitrión, precio inválido y datos del evento.
+              <strong>{CONTRACT_TESTS} pruebas pasan:</strong> la compra con sus firmas exactas, su evento y su TTL;
+              la doble compra; que nadie compre a nombre de otro; que un pago fallido no deje pase; el check-in
+              único con su evento; el check-in sin pase, sin firma o firmado por el propio comprador; y los precios
+              inválidos.
             </>
           }
         >
@@ -193,9 +170,9 @@ winget install Stellar.StellarCLI`}
           command="stellar contract build"
           result={
             <>
-              Un archivo WASM de <strong>4.281 bytes</strong> con 7 funciones. Su huella digital (hash) es{" "}
-              <Mono>{WASM_HASH.slice(0, 8)}…</Mono>, la misma que muestra el explorador para el código publicado:
-              así se comprueba que lo que corre en la red es este código.
+              Un archivo WASM de <strong>{WASM_BYTES.toLocaleString("es-BO")} bytes</strong> con 7 funciones. Su
+              huella digital (hash) es <Mono>{WASM_HASH.slice(0, 8)}…</Mono>, la misma que muestra el explorador
+              para el código publicado: así se comprueba que lo que corre en la red es este código.
             </>
           }
         >
@@ -211,20 +188,14 @@ winget install Stellar.StellarCLI`}
 stellar keys generate asistente --network testnet --fund`}
           result={
             <>
-              Anfitrión{" "}
-              <a href={`${EXPLORER}/account/${HOST}`} target="_blank" rel="noreferrer" className="font-mono underline decoration-dotted underline-offset-4">
-                {short(HOST)}
-              </a>{" "}
-              y asistente{" "}
-              <a href={`${EXPLORER}/account/${GUEST}`} target="_blank" rel="noreferrer" className="font-mono underline decoration-dotted underline-offset-4">
-                {short(GUEST)}
-              </a>
-              , con 10.000 XLM de prueba cada una.
+              Anfitrión <AddressLink address={ORIGINAL.host} /> y asistente <AddressLink address={ORIGINAL.guest} />,
+              con 10.000 XLM de prueba cada una.
             </>
           }
         >
           Cada cuenta es una dirección pública y una llave secreta, que el CLI guarda en la computadora. Con{" "}
-          <Mono>--fund</Mono>, Friendbot les regala XLM de prueba.
+          <Mono>--fund</Mono>, Friendbot les regala XLM de prueba. En esta ejecución el comprador se llama{" "}
+          <em>asistente</em>; en la demo del navegador, <em>invitado</em>.
         </Step>
 
         <Step
@@ -235,25 +206,19 @@ stellar keys generate asistente --network testnet --fund`}
   --source-account anfitrion --network testnet \\
   --alias aex-prueba-pass-stellar-01 \\
   -- --host anfitrion --token ${XLM_CONTRACT} \\
-  --price 10000000 --name "Aex Prueba Pass Stellar 01"`}
+  --price ${ORIGINAL.priceStroops} --name "${ORIGINAL.name}"`}
           result={
             <>
-              Contrato{" "}
-              <a
-                href={`${EXPLORER}/contract/${ORIGINAL_CONTRACT}`}
-                target="_blank"
-                rel="noreferrer"
-                className="font-mono underline decoration-dotted underline-offset-4"
-              >
-                {short(ORIGINAL_CONTRACT)}
-              </a>{" "}
-              publicado a las 13:48. Comisión: 0,011 XLM. <TxLink hash={TX.deploy} />
+              Contrato <AddressLink address={ORIGINAL.contract} kind="contract" /> publicado a las{" "}
+              {ORIGINAL.deploy.time}. Comisión: {formatXlm(ORIGINAL.deploy.feeStroops, 3)} XLM.{" "}
+              <TxLink hash={ORIGINAL.deploy.tx} />
             </>
           }
         >
           Sube el código y crea el contrato. Lo que va después de <Mono>--</Mono> se guarda una sola vez, al
-          nacer: el anfitrión, el activo con que se paga (XLM), el precio (1 XLM, que son 10.000.000 stroops) y
-          el nombre. Esas reglas ya no se pueden cambiar.
+          nacer: el anfitrión, el activo con que se paga (XLM), el precio ({formatXlm(ORIGINAL.priceStroops)} XLM, que
+          son {ORIGINAL.priceStroops.toLocaleString("es-BO")} stroops) y el nombre. Esas reglas ya no se pueden
+          cambiar.
         </Step>
       </Phase>
 
@@ -282,20 +247,20 @@ stellar keys generate asistente --network testnet --fund`}
   --source-account asistente --network testnet -- buy --buyer asistente`}
           result={
             <>
-              Compra confirmada a las 16:40:17. <strong>1 XLM</strong> pasó del asistente al anfitrión, el pase
-              quedó en <em>Bought</em> y el contrato publicó el evento <Mono>bought</Mono>.{" "}
-              <TxLink hash={TX.buy} />
+              Compra confirmada a las {ORIGINAL.buy.time}. <strong>{formatXlm(ORIGINAL.priceStroops)} XLM</strong>{" "}
+              pasó del asistente al anfitrión, el pase quedó en <em>Bought</em> y el contrato publicó el evento{" "}
+              <Mono>bought</Mono>. <TxLink hash={ORIGINAL.buy.tx} />
               <span className="mt-2 block">
-                La comisión fue de <strong>17,64 XLM</strong>: casi todo es renta por guardar datos en la red
-                durante 120 días (el pase, el contrato y su código). Es XLM de prueba, pero me enseñó que ese plazo
-                hay que ajustarlo a la duración real del evento.
+                La comisión fue de <strong>{formatXlm(ORIGINAL.buy.feeStroops, 2)} XLM</strong>: casi todo es renta
+                por guardar datos en la red durante {TTL_DAYS} días (el pase, el contrato y su código). Es XLM de
+                prueba, pero me enseñó que ese plazo hay que ajustarlo a la duración real del evento.
               </span>
             </>
           }
         >
-          El asistente firma. En una sola operación, el contrato le cobra 1 XLM, se lo paga al anfitrión y anota
-          su pase. En el explorador, al abrir el detalle de la transacción (la flecha ⇊), se ven la transferencia
-          de 1 XLM, el evento <Mono>bought</Mono> y el dato guardado <Mono>Pass = Bought</Mono>.
+          El asistente firma. En una sola operación, el contrato le cobra {formatXlm(ORIGINAL.priceStroops)} XLM, se
+          lo paga al anfitrión y anota su pase. En el explorador, al abrir el detalle de la transacción (la flecha
+          ⇊), se ven la transferencia, el evento <Mono>bought</Mono> y el dato guardado <Mono>Pass = Bought</Mono>.
         </Step>
 
         <Step
@@ -305,9 +270,9 @@ stellar keys generate asistente --network testnet --fund`}
   --source-account anfitrion --network testnet -- check_in --buyer asistente`}
           result={
             <>
-              Check-in confirmado a las 16:40:27, diez segundos después. El pase pasó a <em>Used</em> y el
-              contrato publicó el evento <Mono>checked_in</Mono>. Comisión: 0,00076 XLM.{" "}
-              <TxLink hash={TX.checkIn} />
+              Check-in confirmado a las {ORIGINAL.checkIn.time}, diez segundos después. El pase pasó a <em>Used</em>{" "}
+              y el contrato publicó el evento <Mono>checked_in</Mono>. Comisión:{" "}
+              {formatXlm(ORIGINAL.checkIn.feeStroops, 5)} XLM. <TxLink hash={ORIGINAL.checkIn.tx} />
             </>
           }
         >
@@ -323,7 +288,7 @@ stellar keys generate asistente --network testnet --fund`}
   --source-account anfitrion --network testnet -- check_in --buyer asistente`}
           result={
             <>
-              <Mono>Error(Contract, #4)</Mono>: <strong>AlreadyUsed</strong>, este pase ya se usó. La
+              <Mono>Error(Contract, #4)</Mono>: <strong>{alreadyUsed?.name}</strong>, {alreadyUsed?.meaning}. La
               transacción nunca llegó a la red: el CLI la simula antes de enviarla, y la simulación ya falló. Por
               eso este intento no aparece en el explorador.
             </>
@@ -342,7 +307,7 @@ stellar keys generate asistente --network testnet --fund`}
             <>
               <Mono>&quot;Used&quot;</Mono>: el pase está usado. También se ve en el{" "}
               <a
-                href={`${EXPLORER}/contract/${ORIGINAL_CONTRACT}/storage`}
+                href={explorer.storage(ORIGINAL.contract)}
                 target="_blank"
                 rel="noreferrer"
                 className="font-medium text-accent underline-offset-4 hover:underline"
@@ -357,7 +322,7 @@ stellar keys generate asistente --network testnet --fund`}
         </Step>
       </Phase>
 
-      <OriginalLiveStatus guest={GUEST} />
+      <OriginalLiveStatus />
     </div>
   );
 }

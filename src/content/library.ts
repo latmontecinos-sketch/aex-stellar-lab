@@ -1,123 +1,8 @@
-// Todo el contenido del sitio vive aquí: la biblioteca y las tareas.
-// Para agregar algo, se suma una entrada a `library` o a `tasks`.
-
-export type Kind =
-  | "clase"
-  | "apunte"
-  | "documentacion"
-  | "repositorio"
-  | "skill"
-  | "herramienta"
-  | "lectura"
-  | "comunidad";
-
-export type Link = { label: string; href: string };
-
-export type Entry = {
-  id: string;
-  title: string;
-  kind: Kind;
-  summary: string;
-  tags: string[];
-  links: Link[];
-  /** Fecha en que llegó a la biblioteca (o de la clase), AAAA-MM-DD. */
-  date: string;
-  /** Semana del programa. */
-  week: number;
-  /** Quién lo hizo o lo publicó, si no soy yo. */
-  author?: string;
-  /** Para repositorios: si es mío, de la comunidad u oficial. */
-  origin?: "mio" | "comunidad" | "oficial";
-  /** Id de YouTube, para mostrar la miniatura. */
-  video?: string;
-  /** Orden dentro de su sección (menor primero). Si falta, va por fecha. */
-  order?: number;
-  /** Tarea relacionada, por su slug. */
-  task?: string;
-};
-
-export type TaskStatus = "pendiente" | "en-progreso" | "entregado";
-
-export type Task = {
-  slug: string;
-  title: string;
-  track: string;
-  week: number;
-  due: string;
-  status: TaskStatus;
-  statusNote?: string;
-  summary: string;
-};
-
-export const site = {
-  name: "Aex Stellar Lab",
-  tagline: "Una biblioteca personal de lo que voy aprendiendo",
-  program: "Stellar Elite Bolivia · 2026",
-  currentWeek: 4,
-  author: "Alejandro Tintaya Montecinos",
-  authorUrl: "https://latmontecinos.vercel.app",
-  repo: "https://github.com/latmontecinos-sketch/aex-stellar-lab",
-};
-
-export const KINDS: Record<Kind, { one: string; many: string; description: string }> = {
-  clase: {
-    one: "Clase",
-    many: "Clases y videos",
-    description: "Las grabaciones de las clases del programa y cursos para repasar.",
-  },
-  apunte: {
-    one: "Apunte",
-    many: "Mis apuntes",
-    description: "Lo que aprendí, en mis palabras.",
-  },
-  documentacion: {
-    one: "Documentación",
-    many: "Documentación",
-    description: "Guías oficiales y referencias.",
-  },
-  repositorio: {
-    one: "Repositorio",
-    many: "Repositorios",
-    description: "Lo que construyo y repos de la comunidad para estudiar.",
-  },
-  skill: {
-    one: "Skill",
-    many: "Skills e IA",
-    description: "Skills de Claude Code y herramientas de IA para construir en Stellar.",
-  },
-  herramienta: {
-    one: "Herramienta",
-    many: "Herramientas",
-    description: "Lo que uso para escribir, desplegar y revisar contratos.",
-  },
-  lectura: {
-    one: "Lectura",
-    many: "Lecturas",
-    description: "Newsletters y publicaciones del ecosistema y de compañeros.",
-  },
-  comunidad: {
-    one: "Comunidad",
-    many: "Comunidad y oportunidades",
-    description: "Dónde está la comunidad y convocatorias abiertas.",
-  },
-};
-
-export const KIND_ORDER: Kind[] = [
-  "clase",
-  "apunte",
-  "documentacion",
-  "repositorio",
-  "skill",
-  "herramienta",
-  "lectura",
-  "comunidad",
-];
-
-export const ORIGIN_LABELS: Record<NonNullable<Entry["origin"]>, string> = {
-  mio: "Mío",
-  comunidad: "Comunidad",
-  oficial: "Oficial",
-};
+// La biblioteca: una entrada por cosa que llega del programa. Para agregar
+// algo, se suma una entrada a `library` (ver el tipo `Entry` en schema.ts).
+import { CONTRACT_TESTS, ORIGINAL, REPO, TTL_DAYS, explorer } from "@/lib/deployment";
+import { formatXlm } from "@/lib/format";
+import type { Entry } from "./schema";
 
 const EXPLICACION = "/tareas/aex-pass/explicacion";
 const SKILLS = "https://github.com/latmontecinos-sketch/Stellar-Build/tree/main/.claude/skills";
@@ -239,7 +124,7 @@ export const library: Entry[] = [
     title: "Renta y TTL del storage",
     kind: "apunte",
     summary:
-      "Cada dato guardado tiene un tiempo de vida (TTL) y mantenerlo cuesta renta. Mi primera compra cobró 17,64 XLM porque extendía el pase, el contrato y su código a 120 días. Lección: ajustar el plazo a la duración real del evento.",
+      `Cada dato guardado tiene un tiempo de vida (TTL) y mantenerlo cuesta renta. Mi primera compra cobró ${formatXlm(ORIGINAL.buy.feeStroops, 2)} XLM porque extendía el pase, el contrato y su código a ${TTL_DAYS} días. Lección: ajustar el plazo a la duración real del evento.`,
     tags: ["Soroban", "Costos"],
     links: [{ label: "Ver en Aex Pass", href: `${EXPLICACION}#costos` }],
     date: "2026-09-22",
@@ -270,7 +155,7 @@ export const library: Entry[] = [
     links: [
       {
         label: "Ejemplo: la compra de Aex Pass",
-        href: "https://stellar.expert/explorer/testnet/tx/768aab930342ef4dc68fe35d15903768e7ec9eec90812e2c924a29d0070d3645",
+        href: explorer.tx(ORIGINAL.buy.tx),
       },
     ],
     date: "2026-09-22",
@@ -400,14 +285,11 @@ export const library: Entry[] = [
     kind: "repositorio",
     origin: "mio",
     summary:
-      "El contrato Event Pass en Rust con soroban-sdk: pase para un Meet que se compra una vez y se usa una vez. Incluye sus 7 pruebas y la demo del Stellar CLI.",
+      `El contrato Event Pass en Rust con soroban-sdk: pase para un Meet que se compra una vez y se usa una vez. Incluye sus ${CONTRACT_TESTS} pruebas y la demo del Stellar CLI.`,
     tags: ["Soroban", "Rust", "Testnet"],
     links: [
-      { label: "GitHub", href: "https://github.com/latmontecinos-sketch/aex-pass" },
-      {
-        label: "Contrato",
-        href: "https://stellar.expert/explorer/testnet/contract/CCGIRQW6WUR4WT46DTL2EZMQBCY4SNRF622DN2VODMOYGMSFHMDPP6NW",
-      },
+      { label: "GitHub", href: REPO },
+      { label: "Contrato", href: explorer.contract(ORIGINAL.contract) },
     ],
     date: "2026-09-22",
     week: 4,
@@ -708,34 +590,3 @@ export const library: Entry[] = [
     order: 3,
   },
 ];
-
-export const tasks: Task[] = [
-  {
-    slug: "aex-pass",
-    title: "Invocación de un contrato: Event Pass",
-    track: "Event Pass",
-    week: 3,
-    due: "2026-09-17",
-    status: "entregado",
-    statusNote: "En revisión",
-    summary:
-      "Un contrato propio con una invocación exitosa desde el Stellar CLI, su evento y estado en el explorador, y qué sigo aprendiendo. Mi solución: Aex Pass, un pase para entrar a un Meet.",
-  },
-];
-
-export const STATUS_LABELS: Record<TaskStatus, string> = {
-  pendiente: "Pendiente",
-  "en-progreso": "En progreso",
-  entregado: "Entregado",
-};
-
-export function formatDate(iso: string): string {
-  const [y, m, d] = iso.split("-").map(Number);
-  const months = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
-  return `${d} ${months[m - 1]} ${y}`;
-}
-
-/** Orden dentro de una sección: por `order` y, si falta, lo más reciente primero. */
-export function byOrder(a: Entry, b: Entry): number {
-  return (a.order ?? 999) - (b.order ?? 999) || b.date.localeCompare(a.date);
-}

@@ -1,14 +1,8 @@
+import Image from "next/image";
 import Link from "next/link";
-import {
-  KINDS,
-  ORIGIN_LABELS,
-  STATUS_LABELS,
-  formatDate,
-  tasks,
-  type Entry,
-  type Kind,
-  type Task,
-} from "@/content/lab";
+import { KINDS, ORIGIN_LABELS, STATUS_LABELS, formatDate, type Entry, type Kind, type Task } from "@/content/schema";
+import { tasks } from "@/content/tasks";
+import { SmartLink } from "@/components/ui";
 
 const KIND_STYLES: Record<Kind, string> = {
   clase: "bg-bad-soft text-bad",
@@ -27,10 +21,6 @@ const STATUS_STYLES: Record<Task["status"], string> = {
   entregado: "bg-ok-soft text-ok",
 };
 
-function isExternal(href: string) {
-  return href.startsWith("http");
-}
-
 export function EntryCard({ entry }: { entry: Entry }) {
   const task = entry.task ? tasks.find((t) => t.slug === entry.task) : undefined;
   const primary = entry.links[0];
@@ -38,11 +28,13 @@ export function EntryCard({ entry }: { entry: Entry }) {
     <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface">
       {entry.video && primary && (
         <a href={primary.href} target="_blank" rel="noreferrer" className="group relative block aspect-video bg-surface-2">
-          {/* Miniatura pública de YouTube; se carga solo cuando la tarjeta está a la vista. */}
-          <img
+          {/* Miniatura pública de YouTube, sin pasar por el optimizador; se carga al estar a la vista. */}
+          <Image
             src={`https://i.ytimg.com/vi/${entry.video}/hqdefault.jpg`}
             alt=""
-            loading="lazy"
+            width={480}
+            height={360}
+            unoptimized
             className="h-full w-full object-cover transition-opacity group-hover:opacity-90"
           />
           <span
@@ -81,27 +73,11 @@ export function EntryCard({ entry }: { entry: Entry }) {
           </ul>
         )}
         <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-sm">
-          {entry.links.map((link) =>
-            isExternal(link.href) ? (
-              <a
-                key={link.href}
-                href={link.href}
-                target="_blank"
-                rel="noreferrer"
-                className="font-medium text-accent underline-offset-4 hover:underline"
-              >
-                {link.label} ↗
-              </a>
-            ) : (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="font-medium text-accent underline-offset-4 hover:underline"
-              >
-                {link.label} →
-              </Link>
-            ),
-          )}
+          {entry.links.map((link) => (
+            <SmartLink key={link.href} href={link.href} className="font-medium text-accent underline-offset-4 hover:underline">
+              {link.label}
+            </SmartLink>
+          ))}
           {task && (
             <Link
               href={`/tareas/${task.slug}`}
