@@ -11,10 +11,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "test": "node --test src/lib/*.test.ts",
     "test:testnet": "node --test scripts/testnet.test.ts",
-    "check": "eslint . && tsc --noEmit && node --test src/lib/*.test.ts && next build"
+    "check": "eslint . && next typegen && tsc --noEmit && node --test src/lib/*.test.ts && next build"
   },
   "dependencies": {
     "@stellar/stellar-sdk": "17.1.0",
