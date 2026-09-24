@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   description: "Tarea de Stellar Elite: invocación de un contrato del track Event Pass, con su ejecución y explicación.",
 };
 
+const VIDEO_ID = "1-nq9EBfyCn2hW4X8z4S2fxjh59gtMGR-";
+const VIDEO_URL = `https://drive.google.com/file/d/${VIDEO_ID}/view`;
+
 const checklist: { done: boolean; text: string; link?: { label: string; href: string } }[] = [
   {
     done: true,
@@ -28,8 +31,9 @@ const checklist: { done: boolean; text: string; link?: { label: string; href: st
     text: "Qué sigo aprendiendo (abajo).",
   },
   {
-    done: false,
-    text: "El video de 3 minutos.",
+    done: true,
+    text: "El video de 3 minutos, entregado el 23 de septiembre.",
+    link: { label: "Ver el video", href: VIDEO_URL },
   },
 ];
 
@@ -78,6 +82,33 @@ export default function AexPassSummary() {
             Además, mostrar el evento o el estado resultante en el explorador y contar qué es lo siguiente que hay
             que seguir aprendiendo.
           </p>
+        </section>
+
+        <section aria-labelledby="video">
+          <h2 id="video" className="text-xl font-bold tracking-tight">
+            El video
+          </h2>
+          <p className="mt-3 leading-relaxed text-muted">
+            La invocación grabada desde el Stellar CLI, el evento y el estado en el explorador, y qué sigo aprendiendo.
+          </p>
+          <div className="mt-4 aspect-video overflow-hidden rounded-2xl border border-border bg-surface-2">
+            <iframe
+              src={`https://drive.google.com/file/d/${VIDEO_ID}/preview`}
+              title="Video del entregable de Aex Pass"
+              allow="autoplay; fullscreen"
+              allowFullScreen
+              loading="lazy"
+              className="h-full w-full"
+            />
+          </div>
+          <a
+            href={VIDEO_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-2 inline-block text-sm font-medium text-accent hover:underline"
+          >
+            Abrir en Google Drive ↗
+          </a>
         </section>
 
         <section aria-labelledby="solucion">

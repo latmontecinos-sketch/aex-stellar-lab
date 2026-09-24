@@ -716,8 +716,8 @@ export const tasks: Task[] = [
     track: "Event Pass",
     week: 3,
     due: "2026-09-17",
-    status: "en-progreso",
-    statusNote: "Falta el video",
+    status: "entregado",
+    statusNote: "En revisión",
     summary:
       "Un contrato propio con una invocación exitosa desde el Stellar CLI, su evento y estado en el explorador, y qué sigo aprendiendo. Mi solución: Aex Pass, un pase para entrar a un Meet.",
   },
