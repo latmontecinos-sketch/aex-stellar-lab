@@ -1,10 +1,12 @@
 // Prueba de integración contra testnet: cuentas, despliegue, lecturas y un rechazo.
-// No compra: la compra mueve XLM entre cuentas y se prueba desde la interfaz.
+// No compra ni invierte: eso mueve XLM entre cuentas y se prueba desde la interfaz.
 // Necesita red: `pnpm test:testnet`.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import * as s from "../src/lib/stellar.ts";
 import { ORIGINAL } from "../src/lib/deployment.ts";
+import * as rwa from "../src/lib/rwa.ts";
+import { MIN_INVESTMENT, RWA_ASSET, RWA_RUN } from "../src/lib/rwa-deployment.ts";
 
 test("un evento nuevo se despliega, empieza sin pases y rechaza el check-in de quien no compró", async () => {
   const [host, guest] = await Promise.all([s.createFundedAccount(), s.createFundedAccount()]);
@@ -52,4 +54,30 @@ test("los eventos del contrato original se leen recorriendo todas las páginas",
       ["checked_in", ORIGINAL.guest, null],
     ],
   );
+});
+
+test("un launchpad nuevo se inicializa, aprueba al inversionista y rechaza una inversión de 100 con AmountTooLow", async () => {
+  const [admin, investor] = await Promise.all([s.createFundedAccount(), s.createFundedAccount()]);
+
+  const deployed = await rwa.deployLaunchpad(admin.secret);
+  assert.ok(deployed.outcome.ok, `el despliegue debería confirmarse: ${deployed.outcome.ok ? "" : deployed.outcome.message}`);
+
+  const init = await rwa.initializeLaunchpad(deployed.contractId, admin.secret);
+  assert.ok(init.ok, `initialize debería confirmarse: ${init.ok ? "" : init.message}`);
+  const again = await rwa.initializeLaunchpad(deployed.contractId, admin.secret);
+  assert.equal(!again.ok && again.code, 2, "AlreadyInitialized");
+
+  const listed = await rwa.whitelistInvestor(deployed.contractId, admin.secret, investor.publicKey);
+  assert.ok(listed.ok, `set_whitelist debería confirmarse: ${listed.ok ? "" : listed.message}`);
+
+  const small = await rwa.invest(deployed.contractId, investor.secret, 100n);
+  assert.equal(small.outcome.ok, false);
+  assert.equal(!small.outcome.ok && small.outcome.code, 7, "AmountTooLow");
+  assert.equal(!small.outcome.ok && small.outcome.hash, undefined, "un rechazo en la simulación no se envía");
+  assert.equal(await rwa.getRwaBalance(deployed.contractId, investor.publicKey), 0n);
+});
+
+test("el contrato de la entrega responde el balance del inversionista", async () => {
+  const balance = await rwa.getRwaBalance(RWA_RUN.contract, RWA_RUN.investor);
+  assert.ok(balance === 0n || balance === MIN_INVESTMENT / RWA_ASSET.pricePerUnit, `balance inesperado: ${balance}`);
 });

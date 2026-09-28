@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { KINDS, ORIGIN_LABELS, STATUS_LABELS, formatDate, type Entry, type Kind, type Task } from "@/content/schema";
+import { KINDS, ORIGIN_LABELS, STATUS_LABELS, formatDate, formatDue, type Entry, type Kind, type Task } from "@/content/schema";
 import { tasks } from "@/content/tasks";
 import { SmartLink } from "@/components/ui";
 
@@ -110,7 +110,7 @@ export function TaskCard({ task }: { task: Task }) {
       <div className="flex flex-wrap items-center gap-2 text-xs">
         <StatusBadge task={task} />
         <span className="text-muted">
-          Semana {task.week} · Entrega: {formatDate(task.due)}
+          Semana {task.week} · Entrega: {formatDue(task)}
         </span>
       </div>
       <h3 className="mt-3 text-lg font-semibold leading-snug group-hover:text-accent">{task.title}</h3>

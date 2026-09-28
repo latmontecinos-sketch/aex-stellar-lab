@@ -6,7 +6,7 @@ import { TTL_DAYS, WASM_HASH, XLM_CONTRACT, contractError, explorer } from "@/li
 import { formatXlm, parseXlm, short } from "@/lib/format";
 import { AddressLink, ResultBox, Term, TxLink } from "@/components/ui";
 import { EMPTY_LIVE, LivePanel, type Live } from "./live-panel";
-import { ActionButton, Step, type StepStatus } from "./step";
+import { ActionButton, Step, type StepStatus } from "@/components/step";
 import {
   getServerSession,
   getSession,

@@ -16,7 +16,8 @@ Estas reglas salen de la auditoría del 2026-09-23. Casi todo el código lo escr
 - Montos siempre en stroops (`bigint`). Lo que escribe el usuario pasa por `parseXlm` (regex estricto, sin reinterpretar) y nunca se parsea dentro del JSX. Los helpers de dinero llevan tests.
 - El estado de la demo se deriva de la cadena; localStorage es solo caché. La red es fija en testnet: el código que firma con llaves guardadas en el navegador nunca apunta a mainnet.
 - `src/lib/stellar.ts` carga el SDK completo: la interfaz lo importa con `import()` cuando lo necesita, nunca de forma estática en un componente de cliente.
-- Si cambia el contrato (repo `aex-pass`), regenerar `src/lib/aex-pass-contract.ts` con `stellar contract bindings typescript` y actualizar `src/lib/deployment.ts`.
+- Si cambia un contrato, regenerar su cliente con `stellar contract bindings typescript` y actualizar sus datos: `aex-pass` → `src/lib/aex-pass-contract.ts` y `src/lib/deployment.ts`; `rwa-launchpad-bootcamp/dia-3` → `src/lib/rwa-contract.ts` y `src/lib/rwa-deployment.ts`.
+- En la demo del RWA Launchpad, `invest` con el monto válido (mueve XLM) lo aprieta el usuario; los tests contra testnet solo prueban el rechazo.
 
 ## Datos y contenido
 - Una sola fuente por dato: ids, hashes, transacciones, comisiones, errores y conteos del contrato viven en `src/lib/deployment.ts`. Antes de escribir un literal, buscarlo con grep. El README enlaza, no copia cifras.

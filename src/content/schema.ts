@@ -43,7 +43,8 @@ export type Task = {
   title: string;
   track: string;
   week: number;
-  due: string;
+  /** Fecha de entrega, AAAA-MM-DD, si el programa la publicó. */
+  due?: string;
   status: TaskStatus;
   statusNote?: string;
   summary: string;
@@ -139,4 +140,13 @@ export function formatDate(iso: string): string {
 /** Orden dentro de una sección: por `order` y, si falta, lo más reciente primero. */
 export function byOrder(a: Entry, b: Entry): number {
   return (a.order ?? 999) - (b.order ?? 999) || b.date.localeCompare(a.date);
+}
+
+export function formatDue(task: Task): string {
+  return task.due ? formatDate(task.due) : "por confirmar";
+}
+
+/** Las tareas más recientes primero; las que no tienen fecha, arriba de todo. */
+export function byDueDesc(a: Task, b: Task): number {
+  return (b.due ?? "9999").localeCompare(a.due ?? "9999") || b.week - a.week;
 }

@@ -4,7 +4,7 @@ import { CONTRACT_SOURCE, CONTRACT_TESTS, ORIGINAL, TTL_DAYS, explorer } from "@
 import { formatXlm } from "@/lib/format";
 import { CLI_STEPS } from "@/components/how-i-did-it";
 import { taskBySlug } from "@/content/tasks";
-import { SmartLink } from "@/components/ui";
+import { DeliverableChecklist, TaskVideo, driveVideo, type ChecklistItem } from "@/components/deliverable";
 
 export const metadata: Metadata = {
   title: "Aex Pass",
@@ -12,14 +12,9 @@ export const metadata: Metadata = {
 };
 
 const task = taskBySlug("aex-pass");
-const video = task.videoDriveId
-  ? {
-      view: `https://drive.google.com/file/d/${task.videoDriveId}/view`,
-      embed: `https://drive.google.com/file/d/${task.videoDriveId}/preview`,
-    }
-  : null;
+const video = driveVideo(task);
 
-const checklist: { done: boolean; text: string; link?: { label: string; href: string } }[] = [
+const checklist: ChecklistItem[] = [
   {
     done: true,
     text: "Un contrato propio del track Event Pass: el ledger verifica que una cuenta compró su pase y que lo usó una sola vez.",
@@ -91,34 +86,10 @@ export default function AexPassSummary() {
           </p>
         </section>
 
-        {video && (
-        <section aria-labelledby="video">
-          <h2 id="video" className="text-xl font-bold tracking-tight">
-            El video
-          </h2>
-          <p className="mt-3 leading-relaxed text-muted">
-            La invocación grabada desde el Stellar CLI, el evento y el estado en el explorador, y qué sigo aprendiendo.
-          </p>
-          <div className="mt-4 aspect-video overflow-hidden rounded-2xl border border-border bg-surface-2">
-            <iframe
-              src={video.embed}
-              title="Video del entregable de Aex Pass"
-              allow="autoplay; fullscreen"
-              allowFullScreen
-              loading="lazy"
-              className="h-full w-full"
-            />
-          </div>
-          <a
-            href={video.view}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-2 inline-block text-sm font-medium text-accent hover:underline"
-          >
-            Abrir en Google Drive ↗
-          </a>
-        </section>
-        )}
+        <TaskVideo
+          task={task}
+          description="La invocación grabada desde el Stellar CLI, el evento y el estado en el explorador, y qué sigo aprendiendo."
+        />
 
         <section aria-labelledby="solucion">
           <h2 id="solucion" className="text-xl font-bold tracking-tight">
@@ -174,36 +145,7 @@ export default function AexPassSummary() {
         </section>
       </div>
 
-      <aside aria-labelledby="entregable" className="lg:pt-1">
-        <div className="rounded-2xl border border-border bg-surface p-5 lg:sticky lg:top-6">
-          <h2 id="entregable" className="font-semibold">
-            Lo que pide el entregable
-          </h2>
-          <ul className="mt-4 space-y-3">
-            {checklist.map((item) => (
-              <li key={item.text} className="flex gap-3 text-sm">
-                <span
-                  aria-hidden
-                  className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs ${
-                    item.done ? "bg-ok text-surface" : "border border-border text-muted"
-                  }`}
-                >
-                  {item.done ? "✓" : ""}
-                </span>
-                <span>
-                  <span className="sr-only">{item.done ? "Hecho: " : "Pendiente: "}</span>
-                  <span className={item.done ? "" : "text-muted"}>{item.text}</span>
-                  {item.link && (
-                    <SmartLink href={item.link.href} className="mt-0.5 block font-medium text-accent hover:underline">
-                      {item.link.label}
-                    </SmartLink>
-                  )}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </aside>
+      <DeliverableChecklist items={checklist} />
     </div>
   );
 }

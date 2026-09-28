@@ -3,6 +3,17 @@ import type { Task } from "./schema";
 
 export const tasks: Task[] = [
   {
+    slug: "rwa-launchpad",
+    title: "Tarea final: RWA Launchpad en testnet",
+    track: "RWA Launchpad",
+    week: 4,
+    status: "en-progreso",
+    project: "RWA Launchpad",
+    pitch: "Un launchpad de activos del mundo real en Stellar, con una regla: cada inversión es de al menos 500 unidades.",
+    summary:
+      "El launchpad del bootcamp desplegado en testnet con una regla de inversión mínima (AmountTooLow), su test, y el flujo completo del admin y del inversionista con los scripts del repo.",
+  },
+  {
     slug: "aex-pass",
     title: "Invocación de un contrato: Event Pass",
     track: "Event Pass",

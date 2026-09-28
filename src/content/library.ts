@@ -2,6 +2,7 @@
 // algo, se suma una entrada a `library` (ver el tipo `Entry` en schema.ts).
 import { CONTRACT_TESTS, ORIGINAL, REPO, TTL_DAYS, explorer } from "@/lib/deployment";
 import { formatXlm } from "@/lib/format";
+import { MIN_INVESTMENT, RWA_REPO, RWA_RUN, RWA_TESTS, RWA_UPSTREAM } from "@/lib/rwa-deployment";
 import type { Entry } from "./schema";
 
 const EXPLICACION = "/tareas/aex-pass/explicacion";
@@ -297,6 +298,22 @@ export const library: Entry[] = [
     task: "aex-pass",
   },
   {
+    id: "rwa-launchpad-fork",
+    title: "RWA Launchpad (mi fork)",
+    kind: "repositorio",
+    origin: "mio",
+    summary: `El launchpad del bootcamp con mi regla: cada inversión es de al menos ${MIN_INVESTMENT} unidades, o falla con AmountTooLow. Con sus ${RWA_TESTS} tests y los scripts de admin y de usuario apuntando a testnet.`,
+    tags: ["Soroban", "Rust", "RWA", "Testnet"],
+    links: [
+      { label: "GitHub", href: RWA_REPO },
+      { label: "Contrato", href: explorer.contract(RWA_RUN.contract) },
+    ],
+    date: "2026-09-28",
+    week: 4,
+    order: 0,
+    task: "rwa-launchpad",
+  },
+  {
     id: "aex-stellar-lab",
     title: "Aex Stellar Lab",
     kind: "repositorio",
@@ -347,10 +364,11 @@ export const library: Entry[] = [
     summary:
       "Repo base del bootcamp de contratos de Stellar Bolivia (días 1 a 3): un launchpad de activos del mundo real (RWA) en Soroban, con TypeScript.",
     tags: ["Bootcamp", "RWA", "Soroban"],
-    links: [{ label: "GitHub", href: "https://github.com/Oppia-Software-Labs/rwa-launchpad-bootcamp" }],
+    links: [{ label: "GitHub", href: RWA_UPSTREAM }],
     date: "2026-09-21",
     week: 4,
     order: 5,
+    task: "rwa-launchpad",
   },
   {
     id: "trustless-work",

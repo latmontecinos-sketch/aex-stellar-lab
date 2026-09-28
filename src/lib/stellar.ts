@@ -3,12 +3,12 @@
 // recién cuando hace falta.
 import { Horizon, Keypair, Networks, contract, rpc, scValToNative } from "@stellar/stellar-sdk";
 import { AexPassClient, type DeployArgs } from "./aex-pass-contract.ts";
-import { FRIENDBOT_URL, HORIZON_URL, RPC_URL, WASM_HASH, XLM_CONTRACT, contractError } from "./deployment.ts";
+import { FRIENDBOT_URL, HORIZON_URL, RPC_URL, WASM_HASH, XLM_CONTRACT } from "./deployment.ts";
 import { stroopsFromDecimal } from "./format.ts";
 
 // La red es fija. No hay entrada del usuario que pueda cambiarla, y este módulo
 // nunca debe apuntar a mainnet: firma con llaves guardadas en el navegador.
-const NETWORK_PASSPHRASE = Networks.TESTNET;
+export const NETWORK_PASSPHRASE = Networks.TESTNET;
 
 export type PassStatus = "none" | "bought" | "used";
 export type Account = { publicKey: string; secret: string };
@@ -17,7 +17,7 @@ export type TxOutcome =
   | { ok: true; hash: string; feeStroops: bigint | null }
   | {
       ok: false;
-      /** Código del error del contrato (#1…#4), si fue el contrato el que rechazó. */
+      /** Código del error del contrato, si fue el contrato el que rechazó. Su significado lo da la interfaz de cada contrato. */
       code: number | null;
       message: string;
       /** Hash de la transacción, si llegó a enviarse. */
@@ -48,7 +48,7 @@ function messageOf(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-function signerOptions(secret: string) {
+export function signerOptions(secret: string) {
   const keypair = Keypair.fromSecret(secret);
   return { publicKey: keypair.publicKey(), ...contract.basicNodeSigner(keypair, NETWORK_PASSPHRASE) };
 }
@@ -62,11 +62,11 @@ function client(contractId: string, signerSecret?: string): AexPassClient {
   });
 }
 
-function failure(error: unknown, hash?: string): Extract<TxOutcome, { ok: false }> {
+export function failure(error: unknown, hash?: string): Extract<TxOutcome, { ok: false }> {
   const message = messageOf(error);
   const match = /Error\(Contract, #(\d+)\)/.exec(message);
   const code = match ? Number(match[1]) : null;
-  return { ok: false, code, message: contractError(code)?.meaning ?? message, hash };
+  return { ok: false, code, message, hash };
 }
 
 /** Crea una cuenta nueva y le pide XLM de prueba a Friendbot. */
@@ -108,7 +108,7 @@ async function feeOf(hash: string): Promise<bigint | null> {
  * Firma, envía y espera la confirmación. Solo cuenta como hecha si la red
  * responde SUCCESS: que el SDK no lance error no alcanza.
  */
-async function submit<T>(
+export async function submit<T>(
   tx: contract.AssembledTransaction<T>,
   onSubmitted?: OnSubmitted,
 ): Promise<{ outcome: TxOutcome; sent?: contract.SentTransaction<T> }> {
@@ -153,18 +153,33 @@ async function submit<T>(
   }
 }
 
+export type Deployment = { contractId: string; outcome: TxOutcome; ledger: number | null };
+
 /** Despliega una instancia nueva del contrato: un evento con su anfitrión, precio y nombre. */
 export async function deployEvent(
   hostSecret: string,
   name: string,
   priceStroops: bigint,
   onSubmitted?: OnSubmitted,
-): Promise<{ contractId: string; outcome: TxOutcome; ledger: number | null }> {
-  const signer = signerOptions(hostSecret);
-  const args: DeployArgs = { host: signer.publicKey, token: XLM_CONTRACT, price: priceStroops, name };
+): Promise<Deployment> {
+  const args: DeployArgs = { host: publicKeyOf(hostSecret), token: XLM_CONTRACT, price: priceStroops, name };
+  return deployContract(WASM_HASH, args, hostSecret, onSubmitted);
+}
+
+/**
+ * Despliega una instancia nueva de un código ya subido a la red. `args` son los
+ * del constructor, o `null` si el contrato no tiene.
+ */
+export async function deployContract(
+  wasmHash: string,
+  args: Record<string, unknown> | null,
+  signerSecret: string,
+  onSubmitted?: OnSubmitted,
+): Promise<Deployment> {
+  const signer = signerOptions(signerSecret);
   try {
     const tx = await contract.Client.deploy<contract.Client>(args, {
-      wasmHash: WASM_HASH,
+      wasmHash,
       rpcUrl: RPC_URL,
       networkPassphrase: NETWORK_PASSPHRASE,
       ...signer,

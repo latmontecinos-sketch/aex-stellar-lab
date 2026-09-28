@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { TaskCard } from "@/components/cards";
+import { byDueDesc } from "@/content/schema";
 import { tasks } from "@/content/tasks";
 
 export const metadata: Metadata = {
@@ -8,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 export default function TareasPage() {
-  const sorted = [...tasks].sort((a, b) => b.due.localeCompare(a.due));
+  const sorted = [...tasks].sort(byDueDesc);
   return (
     <>
       <section className="py-10 sm:py-12">

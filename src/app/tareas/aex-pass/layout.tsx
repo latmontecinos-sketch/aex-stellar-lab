@@ -1,41 +1,6 @@
-import Link from "next/link";
-import { StatusBadge } from "@/components/cards";
-import { TaskTabs } from "@/components/task-tabs";
-import { formatDate } from "@/content/schema";
+import { TaskLayout } from "@/components/task-layout";
 import { taskBySlug } from "@/content/tasks";
 
-const task = taskBySlug("aex-pass");
-
 export default function AexPassLayout({ children }: LayoutProps<"/tareas/aex-pass">) {
-  return (
-    <>
-      <div className="pt-8 sm:pt-10">
-        <nav aria-label="Ruta" className="text-sm text-muted">
-          <Link href="/tareas" className="hover:text-text">
-            Tareas
-          </Link>{" "}
-          / <span className="text-text">{task.project}</span>
-        </nav>
-        <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
-          <StatusBadge task={task} />
-          <span className="text-muted">
-            Track {task.track} · Entrega: {formatDate(task.due)}
-          </span>
-        </div>
-        <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">{task.project}</h1>
-        <p className="mt-2 max-w-2xl text-lg leading-relaxed text-muted">{task.pitch}</p>
-        <div className="mt-6">
-          <TaskTabs
-            base="/tareas/aex-pass"
-            tabs={[
-              { href: "", label: "Resumen" },
-              { href: "/ejecucion", label: "Ejecución" },
-              { href: "/explicacion", label: "Cómo funciona" },
-            ]}
-          />
-        </div>
-      </div>
-      <div className="pt-8">{children}</div>
-    </>
-  );
+  return <TaskLayout task={taskBySlug("aex-pass")}>{children}</TaskLayout>;
 }
