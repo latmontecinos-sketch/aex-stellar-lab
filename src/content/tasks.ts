@@ -9,6 +9,7 @@ export const tasks: Task[] = [
     week: 4,
     status: "entregado",
     statusNote: "En revisión",
+    videoDriveId: "1jmjMneamtsNs8ZfrAOiG7iOEyr8SZIKU",
     project: "RWA Launchpad",
     pitch: "Un contrato que vende tokens de un activo real. Mi regla: invertir al menos 500.",
     summary:
