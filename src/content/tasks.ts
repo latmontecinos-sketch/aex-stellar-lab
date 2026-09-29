@@ -9,9 +9,9 @@ export const tasks: Task[] = [
     week: 4,
     status: "en-progreso",
     project: "RWA Launchpad",
-    pitch: "Un launchpad de activos del mundo real en Stellar, con una regla: cada inversión es de al menos 500 unidades.",
+    pitch: "Un contrato que vende tokens de un activo real. Mi regla: invertir al menos 500.",
     summary:
-      "El launchpad del bootcamp desplegado en testnet con una regla de inversión mínima (AmountTooLow), su test, y el flujo completo del admin y del inversionista con los scripts del repo.",
+      "El launchpad del bootcamp en testnet, con inversión mínima de 500 (error AmountTooLow), su test y el flujo completo con los scripts.",
   },
   {
     slug: "aex-pass",

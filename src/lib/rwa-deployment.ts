@@ -23,13 +23,13 @@ export const RWA_ASSET = { name: "RWAToken", totalSupply: 1_000_000n, pricePerUn
 
 // Los errores del contrato (`enum Error` en dia-3/src/lib.rs).
 export const RWA_ERRORS = {
-  1: { name: "NotInitialized", meaning: "el launchpad todavía no se inicializó" },
-  2: { name: "AlreadyInitialized", meaning: "el launchpad ya estaba inicializado" },
-  3: { name: "InsufficientBalance", meaning: "no hay saldo suficiente de RWA" },
-  4: { name: "InvalidAmount", meaning: "el monto no alcanza para comprar al menos 1 RWA" },
-  5: { name: "NotWhitelisted", meaning: "el inversionista no está en la whitelist" },
-  6: { name: "Paused", meaning: "el launchpad está en pausa" },
-  7: { name: "AmountTooLow", meaning: `la inversión mínima es de ${MIN_INVESTMENT} unidades del token de pago` },
+  1: { name: "NotInitialized", meaning: "el contrato no se inicializó" },
+  2: { name: "AlreadyInitialized", meaning: "el contrato ya estaba inicializado" },
+  3: { name: "InsufficientBalance", meaning: "no alcanzan los RWA" },
+  4: { name: "InvalidAmount", meaning: "el monto no alcanza para 1 RWA" },
+  5: { name: "NotWhitelisted", meaning: "el inversionista no está aprobado" },
+  6: { name: "Paused", meaning: "el contrato está en pausa" },
+  7: { name: "AmountTooLow", meaning: `el mínimo es ${MIN_INVESTMENT}` },
 } as const satisfies Record<number, { name: string; meaning: string }>;
 
 export type RwaErrorCode = keyof typeof RWA_ERRORS;

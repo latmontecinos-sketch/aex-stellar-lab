@@ -25,13 +25,8 @@ type StepN = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 function failureText(outcome: Pick<Failure, "code" | "message">): string {
   const error = rwaError(outcome.code);
-  if (error) return `El contrato lo rechazó: ${error.meaning} (error #${outcome.code}, ${error.name}).`;
+  if (error) return `Rechazado: ${error.meaning} (${error.name}, error #${outcome.code}).`;
   return `No se pudo completar: ${outcome.message}`;
-}
-
-/** Unidades del token de pago (stroops de XLM), con su equivalente en XLM. */
-function units(amount: bigint) {
-  return `${amount} unidades (${formatXlm(amount)} XLM)`;
 }
 
 /** Lo que se guarda cuando una transacción se confirma, venga del botón o de recuperarla al volver. */
@@ -152,7 +147,7 @@ export function RwaDemo() {
 
   const whitelist = () =>
     run(4, async () => {
-      if (!session.contractId || !session.adminSecret || !investor) throw new Error("Primero inicializa el launchpad (paso 3).");
+      if (!session.contractId || !session.adminSecret || !investor) throw new Error("Primero crea el activo (paso 3).");
       const r = await loadRwa();
       settle(4, await r.whitelistInvestor(session.contractId, session.adminSecret, investor, remember(4)));
       focusStep(5);
@@ -160,7 +155,7 @@ export function RwaDemo() {
 
   const investSmall = () =>
     run(5, async () => {
-      if (!session.contractId || !session.investorSecret) throw new Error("Primero agrega al inversionista a la whitelist (paso 4).");
+      if (!session.contractId || !session.investorSecret) throw new Error("Primero aprueba al inversionista (paso 4).");
       const r = await loadRwa();
       const { outcome } = await r.invest(session.contractId, session.investorSecret, SMALL);
       if (outcome.ok) throw new Error(`El contrato aceptó una inversión de ${SMALL}. Esto no debería pasar.`);
@@ -172,7 +167,7 @@ export function RwaDemo() {
 
   const investOk = () =>
     run(6, async () => {
-      if (!session.contractId || !session.investorSecret) throw new Error("Primero prueba la inversión chica (paso 5).");
+      if (!session.contractId || !session.investorSecret) throw new Error("Primero invierte 100 (paso 5).");
       const r = await loadRwa();
       const { outcome, minted } = await r.invest(session.contractId, session.investorSecret, OK_AMOUNT, remember(6));
       settle(6, outcome, minted);
@@ -187,7 +182,7 @@ export function RwaDemo() {
     });
 
   const reset = () => {
-    if (window.confirm("¿Empezar de nuevo? Se olvidan las cuentas y el launchpad de esta prueba.")) {
+    if (window.confirm("¿Empezar de nuevo? Se olvidan las cuentas y el contrato de esta prueba.")) {
       updateSession(null);
       setErrors({});
       focusStep(1);
@@ -227,14 +222,13 @@ export function RwaDemo() {
       <ol className="flex flex-col gap-5" aria-label="Pasos de la demo">
         <Step
           n={1}
-          title="Crear las cuentas de prueba"
+          title="Crear las cuentas"
           actor="Preparación"
           status={statusOf(1)}
           explanation={
             <>
-              Dos cuentas nuevas: el <strong>admin</strong>, que emite el activo y decide quién puede invertir, y el{" "}
-              <strong>inversionista</strong>. Friendbot, el servicio de la red de prueba, les regala 10.000 XLM a cada
-              una. Sus llaves quedan guardadas solo en este navegador.
+              Un <strong>admin</strong> y un <strong>inversionista</strong>, con 10.000 XLM de prueba cada uno. Las
+              llaves quedan solo en este navegador.
             </>
           }
           action={
@@ -247,8 +241,7 @@ export function RwaDemo() {
         >
           {done[1] && admin && investor && (
             <ResultBox tone="ok">
-              <p className="font-medium">Listo: dos cuentas con 10.000 XLM de prueba cada una.</p>
-              <ul className="mt-2 space-y-1">
+              <ul className="space-y-1">
                 <li>
                   Admin: <AddressLink address={admin} />
                 </li>
@@ -262,16 +255,10 @@ export function RwaDemo() {
 
         <Step
           n={2}
-          title="Desplegar el launchpad"
+          title="Desplegar el contrato"
           actor="Admin"
           status={statusOf(2)}
-          explanation={
-            <>
-              El admin publica su propia copia del contrato de <code className="font-mono">dia-3</code>, con la regla
-              de inversión mínima. Es el mismo código que desplegué con el CLI: una instancia nueva, con su propia
-              dirección.
-            </>
-          }
+          explanation={<>El admin sube su propia copia del contrato, ya con la regla.</>}
           action={
             !done[2] && (
               <ActionButton onClick={deploy} busy={busy === 2} disabled={!canAct(2)}>
@@ -286,22 +273,20 @@ export function RwaDemo() {
           {pendingNote(2)}
           {done[2] && session.contractId && (
             <ResultBox tone="ok">
-              Launchpad desplegado en <AddressLink address={session.contractId} kind="contract" />. Todavía no tiene
-              activo ni admin: eso lo define el paso siguiente.
+              Contrato: <AddressLink address={session.contractId} kind="contract" />
             </ResultBox>
           )}
         </Step>
 
         <Step
           n={3}
-          title="Inicializar el activo"
+          title="Crear el activo"
           actor="Admin"
           status={statusOf(3)}
           explanation={
             <>
-              El admin define el activo: <strong>{RWA_ASSET.name}</strong>, con un precio de{" "}
-              {RWA_ASSET.pricePerUnit.toString()} unidades del token de pago por cada RWA. El token de pago es el XLM de
-              la red de prueba, y su unidad más chica es el stroop (0,0000001 XLM).
+              El admin crea <strong>{RWA_ASSET.name}</strong>: {RWA_ASSET.pricePerUnit.toString()} unidades = 1 RWA, y
+              se paga con XLM.
             </>
           }
           action={
@@ -317,22 +302,16 @@ export function RwaDemo() {
         >
           {pendingNote(3)}
           {done[3] && (
-            <ResultBox tone="ok">
-              Activo {RWA_ASSET.name} inicializado: {RWA_ASSET.pricePerUnit.toString()} unidades = 1 RWA, cobrando en XLM.
-            </ResultBox>
+            <ResultBox tone="ok">Activo {RWA_ASSET.name} creado.</ResultBox>
           )}
         </Step>
 
         <Step
           n={4}
-          title="Agregar al inversionista a la whitelist"
+          title="Aprobar al inversionista"
           actor="Admin"
           status={statusOf(4)}
-          explanation={
-            <>
-              Solo invierte quien el admin aprobó. El contrato exige la firma del admin para cambiar la whitelist.
-            </>
-          }
+          explanation={<>Solo invierte quien está en la whitelist, y solo el admin puede agregarlo.</>}
           action={
             !done[4] && (
               <ActionButton onClick={whitelist} busy={busy === 4} disabled={!canAct(4)}>
@@ -345,7 +324,7 @@ export function RwaDemo() {
           txHash={session.whitelistTx}
         >
           {pendingNote(4)}
-          {done[4] && <ResultBox tone="ok">El inversionista {investorShort} ya puede invertir.</ResultBox>}
+          {done[4] && <ResultBox tone="ok">Aprobado: ya puede invertir.</ResultBox>}
         </Step>
 
         <Step
@@ -355,8 +334,8 @@ export function RwaDemo() {
           status={statusOf(5)}
           explanation={
             <>
-              Ahora la regla: cada inversión tiene que ser de al menos {MIN_INVESTMENT.toString()} unidades del token de
-              pago. Probemos con {units(SMALL)}.
+              La regla: el mínimo es {MIN_INVESTMENT.toString()}. Con {SMALL.toString()}, el contrato tiene que
+              rechazarlo.
             </>
           }
           action={
@@ -372,10 +351,7 @@ export function RwaDemo() {
           {done[5] && session.rejectedCode !== undefined && (
             <ResultBox tone="bad">
               <p className="font-medium">{failureText({ code: session.rejectedCode, message: "" })}</p>
-              <p className="mt-1">
-                La red ni siquiera recibió la transacción: antes de enviarla se simula, y la simulación ya falló. No se
-                cobró nada y el inversionista no recibió RWA.
-              </p>
+              <p className="mt-1">No se cobró nada: la transacción ni siquiera se envió.</p>
             </ResultBox>
           )}
         </Step>
@@ -387,9 +363,8 @@ export function RwaDemo() {
           status={statusOf(6)}
           explanation={
             <>
-              Ahora con el mínimo, {units(OK_AMOUNT)}. El contrato cobra el pago y le da al inversionista{" "}
-              {(OK_AMOUNT / RWA_ASSET.pricePerUnit).toString()} RWA ({OK_AMOUNT.toString()} ÷{" "}
-              {RWA_ASSET.pricePerUnit.toString()}), todo en una sola operación.
+              Con {OK_AMOUNT.toString()} sí pasa: paga {OK_AMOUNT.toString()} unidades ({formatXlm(OK_AMOUNT)} XLM) y
+              recibe {(OK_AMOUNT / RWA_ASSET.pricePerUnit).toString()} RWA.
             </>
           }
           action={
@@ -407,11 +382,8 @@ export function RwaDemo() {
           {done[6] && (
             <ResultBox tone="ok">
               <p className="font-medium">
-                Inversión aceptada: {units(OK_AMOUNT)} pasaron al contrato
-                {session.minted ? ` y el inversionista recibió ${session.minted} RWA` : ""}.
-              </p>
-              <p className="mt-1">
-                El contrato publicó el evento <code className="font-mono">invest</code>.
+                Aceptado: pagó {OK_AMOUNT.toString()}
+                {session.minted ? ` y recibió ${session.minted} RWA` : ""}.
               </p>
             </ResultBox>
           )}
@@ -419,10 +391,10 @@ export function RwaDemo() {
 
         <Step
           n={7}
-          title="Consultar el balance"
+          title="Ver el balance"
           actor="Inversionista"
           status={statusOf(7)}
-          explanation={<>Leemos de la red cuántos RWA tiene el inversionista. Es solo una lectura: no hay que firmar.</>}
+          explanation={<>Cuántos RWA tiene. Solo lee, no firma nada.</>}
           action={
             <ActionButton onClick={readBalance} busy={busy === 7} disabled={!canRead}>
               {done[7] ? "Consultar de nuevo" : "Consultar balance"}
@@ -433,17 +405,16 @@ export function RwaDemo() {
         >
           {done[7] && (
             <ResultBox tone="ok">
-              <p className="font-medium">Balance del inversionista: {session.balance} RWA.</p>
+              <p className="font-medium">Balance: {session.balance} RWA.</p>
             </ResultBox>
           )}
         </Step>
 
         {done[7] && (
           <li className="rounded-2xl border border-accent bg-accent-soft p-5">
-            <p className="font-semibold">¡Terminaste la demo!</p>
+            <p className="font-semibold">¡Listo!</p>
             <p className="mt-1 text-sm text-muted">
-              La inversión de {SMALL.toString()} se rechazó con <code className="font-mono">AmountTooLow</code> y la de{" "}
-              {OK_AMOUNT.toString()} se aceptó. Cualquiera puede verificarlo en el{" "}
+              {SMALL.toString()} se rechazó y {OK_AMOUNT.toString()} se aceptó. Todo queda en el{" "}
               {session.contractId ? (
                 <a
                   href={explorer.contract(session.contractId)}

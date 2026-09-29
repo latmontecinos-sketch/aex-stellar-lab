@@ -1,8 +1,7 @@
 import type { ReactNode } from "react";
-import { XLM_CONTRACT } from "@/lib/deployment";
-import { MIN_INVESTMENT, RWA_ASSET, RWA_RUN, RWA_SCRIPTS, RWA_TESTS, RWA_WASM_HASH, rwaError } from "@/lib/rwa-deployment";
+import { MIN_INVESTMENT, RWA_ASSET, RWA_RUN, RWA_SCRIPTS, RWA_TESTS, rwaError } from "@/lib/rwa-deployment";
 import { getRwaBalance } from "@/lib/rwa";
-import { AddressLink, CodeBlock, Mono, ResultBox, SmartLink, TxLink, type Tone } from "@/components/ui";
+import { AddressLink, CodeBlock, ResultBox, SmartLink, TxLink, type Tone } from "@/components/ui";
 
 // La ejecución con los scripts del repo, desde la carpeta dia-3. Los datos
 // salen de `lib/rwa-deployment.ts`.
@@ -62,13 +61,11 @@ async function LiveBalance() {
   return (
     <p className="mt-6 flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-surface px-5 py-4 text-sm">
       <span aria-hidden className={`h-2.5 w-2.5 rounded-full ${balance === null ? "bg-bad" : balance > 0n ? "bg-ok" : "bg-muted"}`} />
-      <span className="font-semibold">Leído de la red:</span>
+      <span className="font-semibold">En la red ahora:</span>
       <span className="text-muted">
-        {balance === null
-          ? "no se pudo leer en la última actualización; vuelve a intentarlo en unos minutos."
-          : `el inversionista tiene ${balance} RWA en el contrato de la entrega.`}
+        {balance === null ? "no se pudo leer; prueba en unos minutos." : `el inversionista tiene ${balance} RWA.`}
       </span>
-      <span className="text-xs text-muted">(se actualiza cada 5 minutos)</span>
+      <span className="text-xs text-muted">(cada 5 minutos)</span>
     </p>
   );
 }
@@ -79,87 +76,69 @@ export function ScriptsRun() {
       <ol className="flex flex-col gap-5">
         <RunStep
           n={1}
-          title="Probar la regla"
+          title="Probar"
           command={`cd dia-3\ncargo test`}
           result={
-            <>
-              <p className="font-medium">{RWA_TESTS} pruebas en verde.</p>
-              <p className="mt-1">
-                <Mono>test_invest_100_fails_and_500_works</Mono>: {tooLow ? tooLow.name : "el error"} con 100 sin mover
-                tokens, y con 500 el inversionista recibe {minted.toString()} RWA.
-              </p>
-            </>
+            <p>
+              {RWA_TESTS} tests pasan. Con 100 sale {tooLow?.name}; con 500 el inversionista recibe {minted.toString()} RWA.
+            </p>
           }
         >
-          Antes de desplegar, las pruebas de <Mono>src/test.rs</Mono> corren el contrato en un entorno local.
+          Los tests corren el contrato en mi computadora, antes de subirlo.
         </RunStep>
 
         <RunStep
           n={2}
-          title="Compilar y desplegar en testnet"
-          command={`stellar keys generate rwa-admin --network testnet --fund\nstellar keys generate rwa-inversor --network testnet --fund\nstellar contract build\nstellar contract deploy --wasm target/wasm32v1-none/release/rwa_launchpad_dia_3.wasm \\\n  --source rwa-admin --network testnet --alias rwa-launchpad`}
+          title="Desplegar en testnet"
+          command={`stellar keys generate rwa-admin --network testnet --fund\nstellar keys generate rwa-inversor --network testnet --fund\nstellar contract build\nstellar contract deploy --wasm target/wasm32v1-none/release/rwa_launchpad_dia_3.wasm \\n  --source rwa-admin --network testnet --alias rwa-launchpad`}
           result={
-            <>
-              <p className="font-medium">
-                Contrato desplegado: <AddressLink address={RWA_RUN.contract} kind="contract" />.
-              </p>
-              <p className="mt-1">
-                Código <Mono>{RWA_WASM_HASH.slice(0, 12)}…</Mono> · <TxLink hash={RWA_RUN.deployTx} />
-              </p>
-            </>
+            <p>
+              Contrato: <AddressLink address={RWA_RUN.contract} kind="contract" /> · <TxLink hash={RWA_RUN.deployTx} />
+            </p>
           }
         >
-          Dos cuentas de prueba fondeadas con Friendbot, el admin y el inversionista, y el contrato de dia-3 subido a la
-          red.
+          Crea las cuentas del admin y del inversionista, y sube el contrato.
         </RunStep>
 
         <RunStep
           n={3}
-          title="El admin inicializa y aprueba al inversionista"
+          title="Admin: inicializa y aprueba"
           command={`bash scripts/admin-tool.sh`}
           result={
             <ul className="space-y-1">
               <li>
-                <Mono>initialize</Mono>: activo {RWA_ASSET.name}, {RWA_ASSET.pricePerUnit.toString()} unidades por RWA,
-                token de pago <AddressLink address={XLM_CONTRACT} kind="contract" /> (XLM) ·{" "}
+                Activo {RWA_ASSET.name}: {RWA_ASSET.pricePerUnit.toString()} unidades = 1 RWA, se paga en XLM ·{" "}
                 <TxLink hash={RWA_RUN.initializeTx} />
               </li>
               <li>
-                <Mono>set_whitelist</Mono>: <AddressLink address={RWA_RUN.investor} /> aprobado ·{" "}
-                <TxLink hash={RWA_RUN.whitelistTx} />
+                Inversionista <AddressLink address={RWA_RUN.investor} /> aprobado · <TxLink hash={RWA_RUN.whitelistTx} />
               </li>
             </ul>
           }
         >
-          Sin argumentos, <Mono>admin-tool.sh</Mono> corre <Mono>initialize</Mono> y <Mono>set_whitelist</Mono>,
-          firmados por <AddressLink address={RWA_RUN.admin} />.
+          Crea el activo y pone al inversionista en la whitelist.
         </RunStep>
 
         <RunStep
           n={4}
-          title="El inversionista invierte 100, luego 500, y consulta su balance"
+          title="Inversionista: 100, 500 y balance"
           command={`bash scripts/user-tool.sh`}
           tone={RWA_RUN.investTx ? "ok" : "info"}
           result={
             RWA_RUN.investTx ? (
-              <>
-                <p className="font-medium">
-                  100 rechazado con {tooLow?.name} (#7); 500 aceptado: {minted.toString()} RWA.
-                </p>
-                <p className="mt-1">
-                  <TxLink hash={RWA_RUN.investTx}>Ver la inversión exitosa en stellar.expert</TxLink>
-                </p>
-              </>
-            ) : (
               <p>
-                Esta parte la ejecuto en el video de la entrega. Antes de enviarla simulé las dos inversiones: 100 falla
-                con {tooLow?.name} (#7) y 500 devuelve {minted.toString()} RWA.
+                100 rechazado ({tooLow?.name}). 500 aceptado: {minted.toString()} RWA ·{" "}
+                <TxLink hash={RWA_RUN.investTx}>ver en stellar.expert</TxLink>
               </p>
+            ) : (
+              <p>Pendiente: lo corro en el video.</p>
             )
           }
         >
-          Sin argumentos, <Mono>user-tool.sh</Mono> intenta invertir 100 (tiene que fallar), invierte 500 y consulta el
-          balance. Los dos scripts están en <SmartLink href={RWA_SCRIPTS} className="text-accent underline-offset-4 hover:underline">dia-3/scripts</SmartLink>.
+          Invierte 100 (tiene que fallar), después 500, y mira su balance.{" "}
+          <SmartLink href={RWA_SCRIPTS} className="text-accent underline-offset-4 hover:underline">
+            Ver los scripts
+          </SmartLink>
         </RunStep>
       </ol>
       <LiveBalance />

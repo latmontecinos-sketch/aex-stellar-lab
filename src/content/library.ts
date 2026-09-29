@@ -302,7 +302,7 @@ export const library: Entry[] = [
     title: "RWA Launchpad (mi fork)",
     kind: "repositorio",
     origin: "mio",
-    summary: `El launchpad del bootcamp con mi regla: cada inversión es de al menos ${MIN_INVESTMENT} unidades, o falla con AmountTooLow. Con sus ${RWA_TESTS} tests y los scripts de admin y de usuario apuntando a testnet.`,
+    summary: `El launchpad del bootcamp con mi regla: invertir al menos ${MIN_INVESTMENT}, o falla con AmountTooLow. Con ${RWA_TESTS} tests y los scripts listos para testnet.`,
     tags: ["Soroban", "Rust", "RWA", "Testnet"],
     links: [
       { label: "GitHub", href: RWA_REPO },
