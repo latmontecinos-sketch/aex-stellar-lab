@@ -29,3 +29,8 @@ Estas reglas salen de la auditoría del 2026-09-23. Casi todo el código lo escr
 - Un test afirma exactamente lo que dice su nombre. Un script sin `assert` no es un test.
 - Los comentarios explican el código actual, no su historia.
 - `next.config.ts` mantiene la CSP: si la página necesita hablar con un servidor nuevo, se agrega a `connect-src` a propósito.
+
+## Diseño
+- Industrial y minimalista: colores solo de los tokens de `globals.css` (concreto, grafito y un acento naranja), sin colores sueltos. Esquinas casi rectas; `rounded-full` solo para círculos.
+- Tres fuentes: Archivo ancha para títulos (`font-display`), IBM Plex Sans para leer y JetBrains Mono para etiquetas, fechas, botones y código.
+- La lluvia de código del fondo (`code-backdrop.tsx`) va a 24 fps, avanza por tiempo, se pausa con la pestaña oculta y no corre con "reducir movimiento". Las tarjetas son opacas para que no compita con el texto.

@@ -24,8 +24,8 @@ export default function BibliotecaPage() {
   const cards = Object.fromEntries(sorted.map((entry) => [entry.id, <EntryCard key={entry.id} entry={entry} />]));
   return (
     <>
-      <section className="py-10 sm:py-12">
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Biblioteca</h1>
+      <section className="pt-14 pb-10 sm:pt-20 sm:pb-12">
+        <h1 className="text-4xl leading-none font-extrabold uppercase [font-stretch:120%] sm:text-6xl">Biblioteca</h1>
         <p className="mt-3 max-w-2xl leading-relaxed text-muted">
           Todo lo que voy juntando en el programa, ordenado por secciones: las clases, mis apuntes, la
           documentación, los repositorios, las skills, las herramientas, lecturas y oportunidades. Cada entrada

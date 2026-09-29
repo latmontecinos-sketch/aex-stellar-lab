@@ -49,7 +49,7 @@ export function Step({
               <span className="sr-only">Paso {n}: </span>
               {title}
             </h3>
-            <span className="rounded-full bg-surface-2 px-2.5 py-0.5 text-xs text-muted">{actor}</span>
+            <span className="rounded-sm border border-border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted">{actor}</span>
             {locked && <span className="text-xs text-muted">Completa el paso anterior</span>}
           </div>
           <p className="mt-2 leading-relaxed text-muted">{explanation}</p>
@@ -98,7 +98,7 @@ export function ActionButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-accent px-6 font-medium text-surface transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+      className="inline-flex h-11 items-center justify-center gap-2 rounded-sm bg-accent px-5 font-mono text-xs font-medium uppercase tracking-wider text-surface transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
     >
       {busy && (
         <span aria-hidden className="h-4 w-4 animate-spin rounded-full border-2 border-surface border-t-transparent" />

@@ -70,7 +70,7 @@ export function LivePanel({
           type="button"
           onClick={onRefresh}
           disabled={!hasAccounts || refreshing}
-          className="rounded-full border border-border px-3 py-1 text-xs text-muted hover:border-accent hover:text-accent disabled:opacity-50"
+          className="rounded-sm border border-border px-3 py-1 font-mono text-[11px] uppercase tracking-wider text-muted hover:border-accent hover:text-accent disabled:opacity-50"
         >
           {refreshing ? "Leyendo…" : "Actualizar"}
         </button>

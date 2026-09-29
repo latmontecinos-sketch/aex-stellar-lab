@@ -1,19 +1,26 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Archivo, IBM_Plex_Sans, JetBrains_Mono } from "next/font/google";
+import { CodeBackdrop } from "@/components/code-backdrop";
 import { SiteHeader } from "@/components/site-header";
 import { site } from "@/content/schema";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Tres familias: Archivo ancha para títulos, Plex Sans para leer y
+// JetBrains Mono para etiquetas y código.
+const archivo = Archivo({
+  variable: "--font-archivo",
+  subsets: ["latin"],
+  axes: ["wdth"],
+});
+
+const plexSans = IBM_Plex_Sans({
+  variable: "--font-plex-sans",
   subsets: ["latin"],
 });
 
-// La fuente mono solo aparece en las páginas de tareas: no se precarga en todas.
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
   subsets: ["latin"],
-  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -23,14 +30,17 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="es" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col font-sans">
+    <html
+      lang="es"
+      className={`${archivo.variable} ${plexSans.variable} ${jetbrainsMono.variable} h-full antialiased`}
+    >
+      <body className="relative isolate flex min-h-full flex-col font-sans">
+        <CodeBackdrop />
         <SiteHeader />
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-16 sm:px-8">{children}</main>
-        <footer className="border-t border-border">
-          <div className="mx-auto flex max-w-6xl flex-wrap gap-x-6 gap-y-2 px-4 py-6 text-sm text-muted sm:px-8">
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-20 sm:px-8">{children}</main>
+        <footer className="border-t border-border bg-bg">
+          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-6 font-mono text-xs uppercase tracking-wider text-muted sm:px-8">
             <span>
-              {site.name} ·{" "}
               <a href={site.authorUrl} className="text-text hover:text-accent">
                 {site.author}
               </a>{" "}

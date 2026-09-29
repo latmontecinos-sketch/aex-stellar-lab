@@ -16,8 +16,8 @@ export function TaskTabs({ base, tabs }: { base: string; tabs: { href: string; l
               <Link
                 href={href}
                 aria-current={active ? "page" : undefined}
-                className={`inline-flex h-11 items-center whitespace-nowrap border-b-2 px-4 text-sm transition-colors ${
-                  active ? "border-accent font-medium text-accent" : "border-transparent text-muted hover:text-text"
+                className={`inline-flex h-11 items-center whitespace-nowrap border-b-2 px-4 font-mono text-xs uppercase tracking-wider transition-colors ${
+                  active ? "border-accent text-text" : "border-transparent text-muted hover:text-text"
                 }`}
               >
                 {tab.label}

@@ -85,3 +85,57 @@ export function CodeBlock({ children }: { children: string }) {
     </pre>
   );
 }
+
+/** Encabezado de sección: número en mono, título ancho y un enlace opcional a la derecha. */
+export function SectionHeading({
+  id,
+  index,
+  title,
+  link,
+}: {
+  id: string;
+  index: string;
+  title: string;
+  link?: { href: string; label: string };
+}) {
+  return (
+    <div className="flex items-end justify-between gap-4 border-b border-border pb-3">
+      <h2 id={id} className="flex items-baseline gap-3 text-xl font-bold uppercase sm:text-2xl">
+        <span className="font-mono text-xs font-medium text-accent [font-stretch:100%]">{index}</span>
+        {title}
+      </h2>
+      {link && (
+        <Link
+          href={link.href}
+          className="shrink-0 font-mono text-xs uppercase tracking-wider text-muted hover:text-accent"
+        >
+          {link.label} →
+        </Link>
+      )}
+    </div>
+  );
+}
+
+const BUTTON =
+  "inline-flex h-11 items-center gap-2 rounded-sm px-5 font-mono text-xs font-medium uppercase tracking-wider transition-colors";
+
+/** Botón-enlace: `primary` en el acento, `secondary` con borde. */
+export function ButtonLink({
+  href,
+  variant = "primary",
+  children,
+}: {
+  href: string;
+  variant?: "primary" | "secondary";
+  children: ReactNode;
+}) {
+  const style =
+    variant === "primary"
+      ? "bg-accent text-surface hover:opacity-90"
+      : "border border-text/25 bg-surface/60 text-text hover:border-accent hover:text-accent";
+  return (
+    <Link href={href} className={`${BUTTON} ${style}`}>
+      {children} →
+    </Link>
+  );
+}

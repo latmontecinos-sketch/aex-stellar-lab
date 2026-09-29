@@ -36,7 +36,7 @@ function Chip({
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`inline-flex h-9 items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 text-sm transition-colors ${
+      className={`inline-flex h-9 items-center gap-1.5 whitespace-nowrap rounded-sm border px-3 font-mono text-xs uppercase tracking-wider transition-colors ${
         active ? "border-accent bg-accent-soft font-medium text-accent" : "border-border bg-surface text-muted hover:text-text"
       }`}
     >
@@ -96,7 +96,7 @@ function LibraryView({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Buscar: soroban, escrow, clase…"
-              className="h-10 w-full rounded-full border border-border bg-surface px-4 text-sm outline-none placeholder:text-muted focus:border-accent"
+              className="h-10 w-full rounded-sm border border-border bg-surface px-4 text-sm outline-none placeholder:text-muted focus:border-accent"
             />
           </label>
         </div>

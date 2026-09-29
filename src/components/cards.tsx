@@ -4,21 +4,25 @@ import { KINDS, ORIGIN_LABELS, STATUS_LABELS, formatDate, formatDue, type Entry,
 import { tasks } from "@/content/tasks";
 import { SmartLink } from "@/components/ui";
 
+// Etiquetas sobrias: solo las clases y lo mío llevan el acento.
 const KIND_STYLES: Record<Kind, string> = {
-  clase: "bg-bad-soft text-bad",
-  apunte: "bg-ok-soft text-ok",
-  documentacion: "bg-accent-soft text-accent",
-  repositorio: "bg-surface-2 text-text",
-  skill: "bg-accent-soft text-accent",
-  herramienta: "bg-surface-2 text-muted",
-  lectura: "bg-warn-soft text-text",
-  comunidad: "bg-warn-soft text-text",
+  clase: "border-accent/50 text-accent",
+  apunte: "border-text/30 text-text",
+  documentacion: "border-border text-muted",
+  repositorio: "border-text/30 text-text",
+  skill: "border-border text-muted",
+  herramienta: "border-border text-muted",
+  lectura: "border-border text-muted",
+  comunidad: "border-border text-muted",
 };
 
+const LABEL = "rounded-sm border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider";
+const META = "font-mono text-[11px] uppercase tracking-wider text-muted";
+
 const STATUS_STYLES: Record<Task["status"], string> = {
-  pendiente: "bg-surface-2 text-muted",
-  "en-progreso": "bg-warn-soft text-text",
-  entregado: "bg-ok-soft text-ok",
+  pendiente: "border-border text-muted",
+  "en-progreso": "border-accent/50 text-accent",
+  entregado: "border-ok/50 text-ok",
 };
 
 export function EntryCard({ entry }: { entry: Entry }) {
@@ -48,25 +52,25 @@ export function EntryCard({ entry }: { entry: Entry }) {
       )}
       <div className="flex flex-1 flex-col p-5">
         <div className="flex flex-wrap items-center gap-2 text-xs">
-          <span className={`rounded-full px-2.5 py-0.5 font-medium ${KIND_STYLES[entry.kind]}`}>
+          <span className={`${LABEL} ${KIND_STYLES[entry.kind]}`}>
             {KINDS[entry.kind].one}
           </span>
           {entry.origin && (
-            <span className="rounded-full border border-border px-2.5 py-0.5 text-muted">
+            <span className={`${LABEL} border-border text-muted`}>
               {ORIGIN_LABELS[entry.origin]}
             </span>
           )}
-          <span className="text-muted">
+          <span className={META}>
             Semana {entry.week} · {formatDate(entry.date)}
           </span>
         </div>
-        <h3 className="mt-3 text-lg font-semibold leading-snug">{entry.title}</h3>
+        <h3 className="mt-3 text-lg font-bold leading-snug">{entry.title}</h3>
         {entry.author && <p className="mt-0.5 text-sm text-muted">por {entry.author}</p>}
         <p className="mt-1.5 flex-1 text-sm leading-relaxed text-muted">{entry.summary}</p>
         {entry.tags.length > 0 && (
-          <ul className="mt-3 flex flex-wrap gap-1.5" aria-label="Etiquetas">
+          <ul className="mt-3 flex flex-wrap gap-x-3 gap-y-1" aria-label="Etiquetas">
             {entry.tags.map((tag) => (
-              <li key={tag} className="rounded-md border border-border px-2 py-0.5 text-xs text-muted">
+              <li key={tag} className="font-mono text-[11px] text-muted before:content-['#']">
                 {tag}
               </li>
             ))}
@@ -94,7 +98,7 @@ export function EntryCard({ entry }: { entry: Entry }) {
 
 export function StatusBadge({ task }: { task: Task }) {
   return (
-    <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_STYLES[task.status]}`}>
+    <span className={`${LABEL} ${STATUS_STYLES[task.status]}`}>
       {STATUS_LABELS[task.status]}
       {task.statusNote ? ` · ${task.statusNote}` : ""}
     </span>
@@ -109,13 +113,13 @@ export function TaskCard({ task }: { task: Task }) {
     >
       <div className="flex flex-wrap items-center gap-2 text-xs">
         <StatusBadge task={task} />
-        <span className="text-muted">
+        <span className={META}>
           Semana {task.week} · Entrega: {formatDue(task)}
         </span>
       </div>
-      <h3 className="mt-3 text-lg font-semibold leading-snug group-hover:text-accent">{task.title}</h3>
+      <h3 className="mt-3 text-lg font-bold leading-snug group-hover:text-accent">{task.title}</h3>
       <p className="mt-1.5 text-sm leading-relaxed text-muted">{task.summary}</p>
-      <span className="mt-4 inline-block text-sm font-medium text-accent">Abrir tarea →</span>
+      <span className="mt-4 inline-block font-mono text-xs uppercase tracking-wider text-accent">Abrir tarea →</span>
     </Link>
   );
 }
