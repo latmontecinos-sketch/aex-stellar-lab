@@ -7,7 +7,8 @@ export const tasks: Task[] = [
     title: "Tarea final: RWA Launchpad en testnet",
     track: "RWA Launchpad",
     week: 4,
-    status: "en-progreso",
+    status: "entregado",
+    statusNote: "En revisión",
     project: "RWA Launchpad",
     pitch: "Un contrato que vende tokens de un activo real. Mi regla: invertir al menos 500.",
     summary:
@@ -20,7 +21,7 @@ export const tasks: Task[] = [
     week: 3,
     due: "2026-09-17",
     status: "entregado",
-    statusNote: "En revisión",
+    statusNote: "Aprobado",
     project: "Aex Pass",
     pitch: "Un pase para entrar a un Meet que no se puede usar dos veces, controlado por un contrato en Stellar.",
     videoDriveId: "1-nq9EBfyCn2hW4X8z4S2fxjh59gtMGR-",

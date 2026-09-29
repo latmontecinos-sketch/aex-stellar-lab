@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { explorer } from "@/lib/deployment";
 import { formatXlm, short } from "@/lib/format";
-import { MIN_INVESTMENT, RWA_ASSET, RWA_REPO, RWA_RUN, RWA_SOURCE, RWA_TESTS_SOURCE, RWA_UPSTREAM } from "@/lib/rwa-deployment";
+import { MIN_INVESTMENT, RWA_ASSET, RWA_REPO, RWA_DELIVERY, RWA_SOURCE, RWA_TESTS_SOURCE, RWA_UPSTREAM } from "@/lib/rwa-deployment";
 import { taskBySlug } from "@/content/tasks";
 import { DeliverableChecklist, TaskVideo, driveVideo, type ChecklistItem } from "@/components/deliverable";
 import { Mono, SmartLink } from "@/components/ui";
@@ -23,13 +23,11 @@ const checklist: ChecklistItem[] = [
   { done: true, text: "Test: 100 falla, 500 funciona.", link: { label: "Ver el test", href: RWA_TESTS_SOURCE } },
   {
     done: true,
-    text: `Contrato en testnet: ${short(RWA_RUN.contract)}.`,
-    link: { label: "Ver en stellar.expert", href: explorer.contract(RWA_RUN.contract) },
+    text: `Contrato en testnet: ${short(RWA_DELIVERY.contract)}.`,
+    link: { label: "Ver en stellar.expert", href: explorer.contract(RWA_DELIVERY.contract) },
   },
   { done: true, text: "Admin: inicializa y aprueba al inversionista.", link: { label: "Ver la ejecución", href: "/tareas/rwa-launchpad/ejecucion" } },
-  RWA_RUN.investTx
-    ? { done: true, text: flow, link: { label: "Ver la inversión exitosa", href: explorer.tx(RWA_RUN.investTx) } }
-    : { done: false, text: flow },
+  { done: true, text: flow, link: { label: "Ver la inversión exitosa", href: explorer.tx(RWA_DELIVERY.investTx) } },
   video
     ? { done: true, text: "Video: inversión fallida y exitosa.", link: { label: "Ver el video", href: video.view } }
     : { done: false, text: "Video: inversión fallida y exitosa (máx. 2 min)." },

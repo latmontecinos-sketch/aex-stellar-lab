@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { MIN_INVESTMENT, RWA_ASSET, RWA_RUN, RWA_SCRIPTS, RWA_TESTS, rwaError } from "@/lib/rwa-deployment";
+import { MIN_INVESTMENT, RWA_ASSET, RWA_DELIVERY, RWA_RUN, RWA_SCRIPTS, RWA_TESTS, rwaError } from "@/lib/rwa-deployment";
 import { getRwaBalance } from "@/lib/rwa";
 import { AddressLink, CodeBlock, ResultBox, SmartLink, TxLink, type Tone } from "@/components/ui";
 
@@ -131,7 +131,10 @@ export function ScriptsRun() {
                 <TxLink hash={RWA_RUN.investTx}>ver en stellar.expert</TxLink>
               </p>
             ) : (
-              <p>Pendiente: lo corro en el video.</p>
+              <p>
+                La inversión de la entrega la hice con los botones de abajo ·{" "}
+                <TxLink hash={RWA_DELIVERY.investTx}>ver en stellar.expert</TxLink>
+              </p>
             )
           }
         >

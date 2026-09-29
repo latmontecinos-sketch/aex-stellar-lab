@@ -49,3 +49,10 @@ export const RWA_RUN = {
   whitelistTx: "30d0e927ac8ef669538075b2e7dd1141fe1092137d22a58f471c547957e9c019",
   investTx: null as string | null,
 };
+
+// Lo que se entregó: el flujo del video, hecho con los botones de la página el
+// 29 de septiembre de 2026 en su propia copia del contrato.
+export const RWA_DELIVERY = {
+  contract: "CDVCA4UCPNX4IPM2ZGNDPSUNEV4S5HW6PFRNOLLMDDBVKVDKRAKUTBEI",
+  investTx: "3958ca9f0d7edfb3ad5331e3dfb4a535609cb659a867d206b3acab88b809a770",
+};
