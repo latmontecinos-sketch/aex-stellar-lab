@@ -279,6 +279,22 @@ export const library: Entry[] = [
     week: 4,
     order: 8,
   },
+  {
+    id: "stripe-stablecoins",
+    title: "Stripe y las stablecoins",
+    kind: "documentacion",
+    author: "Stripe",
+    summary:
+      "Stripe deja cobrar, guardar y enviar USDC, y Stellar es una de sus redes. Guardar saldo en USDC está en acceso anticipado para Bolivia: se pide con un formulario.",
+    tags: ["USDC", "Pagos", "Stablecoins"],
+    links: [
+      { label: "docs.stripe.com", href: "https://docs.stripe.com/stablecoins" },
+      { label: "Redes soportadas", href: "https://docs.stripe.com/treasury/transfer-send#stablecoin-assets" },
+    ],
+    date: "2026-10-01",
+    week: 5,
+    order: 9,
+  },
 
   // ── Repositorios ───────────────────────────────────────────────────
   {
