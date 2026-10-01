@@ -23,6 +23,9 @@ export default function KosmoviaPage() {
         <p className="mt-4 max-w-xl text-lg leading-relaxed text-muted">{kosmovia.pitch}</p>
         <div className="mt-8 flex flex-wrap gap-3">
           <ButtonLink href={kosmovia.site}>Ver el sitio</ButtonLink>
+          <ButtonLink href={kosmovia.deck} variant="secondary">
+            Ver el pitch
+          </ButtonLink>
           <ButtonLink href={kosmovia.repo} variant="secondary">
             GitHub
           </ButtonLink>
@@ -45,7 +48,7 @@ export default function KosmoviaPage() {
 
       <section aria-labelledby="etapas" className="pb-16">
         <SectionHeading id="etapas" index="02" title="Por etapas" />
-        <p className="mt-4 text-sm text-muted">Primero Bolivia, después el mundo. De la A a la D en 2026; el resto en 2027.</p>
+        <p className="mt-4 text-sm text-muted">Primero Bolivia, después el mundo. De la A a la D en octubre de 2026; el resto en 2027.</p>
         <ol className="mt-4 border border-border bg-surface">
           {kosmovia.stages.map((s) => (
             <li
