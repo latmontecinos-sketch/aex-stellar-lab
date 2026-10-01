@@ -36,7 +36,7 @@ export function TaskVideo({ task, description }: { task: Task; description: stri
         href={video.view}
         target="_blank"
         rel="noreferrer"
-        className="mt-2 inline-block text-sm font-medium text-accent hover:underline"
+        className="mt-2 inline-block text-sm font-medium text-accent underline underline-offset-4"
       >
         Abrir en Google Drive ↗
       </a>
@@ -66,7 +66,7 @@ export function DeliverableChecklist({ items }: { items: ChecklistItem[] }) {
                 <span className="sr-only">{item.done ? "Hecho: " : "Pendiente: "}</span>
                 <span className={item.done ? "" : "text-muted"}>{item.text}</span>
                 {item.link && (
-                  <SmartLink href={item.link.href} className="mt-0.5 block font-medium text-accent hover:underline">
+                  <SmartLink href={item.link.href} className="mt-0.5 block font-medium text-accent underline underline-offset-4">
                     {item.link.label}
                   </SmartLink>
                 )}

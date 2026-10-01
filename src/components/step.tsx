@@ -30,9 +30,9 @@ export function Step({
   return (
     <li
       id={`paso-${n}`}
-      className={`rounded-2xl border bg-surface p-5 transition-opacity sm:p-6 ${
+      className={`rounded-2xl border bg-surface p-5 sm:p-6 ${
         status === "ready" ? "border-accent shadow-sm" : "border-border"
-      } ${locked ? "opacity-60" : ""}`}
+      }`}
     >
       <div className="flex items-start gap-4">
         <span
@@ -45,7 +45,7 @@ export function Step({
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <h3 className="text-lg font-semibold">
+            <h3 className={`text-lg font-semibold ${locked ? "text-muted" : ""}`}>
               <span className="sr-only">Paso {n}: </span>
               {title}
             </h3>

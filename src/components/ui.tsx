@@ -32,7 +32,7 @@ export function TxLink({ hash, children }: { hash: string; children?: ReactNode 
       href={explorer.tx(hash)}
       target="_blank"
       rel="noreferrer"
-      className="font-medium text-accent underline-offset-4 hover:underline"
+      className="font-medium text-accent underline underline-offset-4"
     >
       {children ?? `tx ${hash.slice(0, 8)}…`} ↗
     </a>
@@ -80,7 +80,7 @@ export function ResultBox({ tone, children }: { tone: Tone; children: ReactNode 
 
 export function CodeBlock({ children }: { children: string }) {
   return (
-    <pre className="overflow-x-auto rounded-xl bg-code-bg p-4 font-mono text-xs leading-relaxed text-code-text">
+    <pre tabIndex={0} className="overflow-x-auto rounded-xl bg-code-bg p-4 font-mono text-xs leading-relaxed text-code-text">
       {children}
     </pre>
   );

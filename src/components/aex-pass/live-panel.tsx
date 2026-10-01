@@ -157,7 +157,7 @@ export function LivePanel({
                           href={explorer.tx(event.txHash)}
                           target="_blank"
                           rel="noreferrer"
-                          className="mt-0.5 block text-xs text-accent hover:underline"
+                          className="mt-0.5 block text-xs text-accent underline underline-offset-4"
                         >
                           bloque {event.ledger.toLocaleString("es-BO")} ↗
                         </a>
@@ -174,7 +174,7 @@ export function LivePanel({
               href={explorer.contract(contractId)}
               target="_blank"
               rel="noreferrer"
-              className="text-sm font-medium text-accent hover:underline"
+              className="text-sm font-medium text-accent underline underline-offset-4"
             >
               Ver el contrato en el explorador ↗
             </a>

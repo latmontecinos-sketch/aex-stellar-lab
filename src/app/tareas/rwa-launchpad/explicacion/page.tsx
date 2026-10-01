@@ -72,7 +72,7 @@ export default function RwaLaunchpadExplanation() {
         <CodeBlock>{GATE_SNIPPET}</CodeBlock>
         <p>
           Es lo primero que revisa <Mono>invest</Mono>: si falla, no se cobra nada.{" "}
-          <SmartLink href={RWA_SOURCE} className="text-accent underline-offset-4 hover:underline">
+          <SmartLink href={RWA_SOURCE} className="text-accent underline underline-offset-4">
             Ver el código
           </SmartLink>
         </p>
@@ -100,7 +100,7 @@ export default function RwaLaunchpadExplanation() {
       </Section>
 
       <Section id="errores" title="Los errores">
-        <div className="overflow-x-auto rounded-2xl border border-border">
+        <div tabIndex={0} className="overflow-x-auto rounded-2xl border border-border">
           <table className="w-full text-left text-sm">
             <tbody>
               {Object.entries(RWA_ERRORS).map(([code, error]) => (
@@ -121,7 +121,7 @@ export default function RwaLaunchpadExplanation() {
       <Section id="tests" title="Los tests">
         <p>
           <Mono>cargo test</Mono> prueba el contrato en mi computadora.{" "}
-          <SmartLink href={RWA_TESTS_SOURCE} className="text-accent underline-offset-4 hover:underline">
+          <SmartLink href={RWA_TESTS_SOURCE} className="text-accent underline underline-offset-4">
             Ver los tests
           </SmartLink>
         </p>

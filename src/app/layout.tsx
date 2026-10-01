@@ -41,7 +41,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <footer className="border-t border-border bg-bg">
           <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-6 font-mono text-xs uppercase tracking-wider text-muted sm:px-8">
             <span>
-              <a href={site.authorUrl} className="text-text hover:text-accent">
+              <a href={site.authorUrl} className="text-text underline decoration-dotted underline-offset-4 hover:text-accent">
                 {site.author}
               </a>{" "}
               · {site.program}

@@ -206,7 +206,7 @@ export default function AexPassExplanation() {
         </Section>
 
         <Section id="funciones" title="Qué hace cada función">
-          <div className="overflow-x-auto rounded-2xl border border-border">
+          <div tabIndex={0} className="overflow-x-auto rounded-2xl border border-border">
             <table className="w-full min-w-[36rem] text-left text-sm">
               <thead className="bg-surface-2 text-xs uppercase tracking-wide text-muted">
                 <tr>
@@ -235,7 +235,7 @@ export default function AexPassExplanation() {
               href={CONTRACT_SOURCE}
               target="_blank"
               rel="noreferrer"
-              className="font-medium text-accent hover:underline"
+              className="font-medium text-accent underline underline-offset-4"
             >
               GitHub ↗
             </a>
@@ -282,7 +282,7 @@ export default function AexPassExplanation() {
             Si el contrato la rechaza, la simulación falla con un código de error y la transacción no se envía:
             no queda registrada y no se cobra nada.
           </p>
-          <div className="mt-5 overflow-x-auto rounded-2xl border border-border">
+          <div tabIndex={0} className="mt-5 overflow-x-auto rounded-2xl border border-border">
             <table className="w-full min-w-[30rem] text-left text-sm">
               <thead className="bg-surface-2 text-xs uppercase tracking-wide text-muted">
                 <tr>

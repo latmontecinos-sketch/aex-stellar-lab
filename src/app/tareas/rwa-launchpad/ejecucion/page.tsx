@@ -19,7 +19,7 @@ export default function RwaLaunchpadExecution() {
         </h2>
         <p className="mt-2 max-w-3xl leading-relaxed text-muted">
           Lo que corrí en la terminal, desde la carpeta <code className="font-mono">dia-3</code>.{" "}
-          <a href="#hazlo" className="text-accent underline-offset-4 hover:underline">
+          <a href="#hazlo" className="text-accent underline underline-offset-4">
             O hazlo con botones ↓
           </a>
         </p>

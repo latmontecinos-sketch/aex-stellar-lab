@@ -139,7 +139,7 @@ export function ScriptsRun() {
           }
         >
           Invierte 100 (tiene que fallar), después 500, y mira su balance.{" "}
-          <SmartLink href={RWA_SCRIPTS} className="text-accent underline-offset-4 hover:underline">
+          <SmartLink href={RWA_SCRIPTS} className="text-accent underline underline-offset-4">
             Ver los scripts
           </SmartLink>
         </RunStep>

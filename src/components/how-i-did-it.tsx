@@ -133,7 +133,7 @@ winget install Stellar.StellarCLI`}
             <>
               Un contrato de unas 160 líneas en Rust con <Mono>soroban-sdk</Mono>. El fragmento de arriba está
               simplificado; el código completo está en{" "}
-              <a href={CONTRACT_SOURCE} target="_blank" rel="noreferrer" className="font-medium text-accent underline-offset-4 hover:underline">
+              <a href={CONTRACT_SOURCE} target="_blank" rel="noreferrer" className="font-medium text-accent underline underline-offset-4">
                 GitHub ↗
               </a>
               .
@@ -310,7 +310,7 @@ stellar keys generate asistente --network testnet --fund`}
                 href={explorer.storage(ORIGINAL.contract)}
                 target="_blank"
                 rel="noreferrer"
-                className="font-medium text-accent underline-offset-4 hover:underline"
+                className="font-medium text-accent underline underline-offset-4"
               >
                 storage del contrato ↗
               </a>

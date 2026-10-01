@@ -1,7 +1,12 @@
 @import "tailwindcss";
 
 /* Paleta industrial: concreto y grafito, con un solo acento naranja de
-   seguridad. Los pares texto/fondo cumplen contraste AA en los dos modos. */
+   seguridad. En los dos modos, `text`, `muted`, `accent`, `ok` y `bad` llegan
+   a 4.5:1 (AA en texto pequeño) sobre `bg`, `surface` y su fondo `*-soft`, y
+   todos menos `ok` también sobre `surface-2` (`ok` ahí da 4.25 en claro: no
+   usarlo como texto sobre `surface-2`). El acento no llega a 3:1 frente al
+   texto, así que un enlace dentro de un párrafo va subrayado: el color solo no
+   alcanza para distinguirlo. */
 :root {
   --bg: #e9e8e4;
   --surface: #f6f6f3;
@@ -9,9 +14,9 @@
   --border: #c9c8c2;
   --text: #16171a;
   --muted: #5e5f5b;
-  --accent: #c2410c;
+  --accent: #ac3a0b;
   --accent-soft: #f1ddd0;
-  --ok: #1f7a45;
+  --ok: #1d7442;
   --ok-soft: #dcebdf;
   --bad: #b42318;
   --bad-soft: #f3dcd8;

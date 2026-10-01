@@ -78,7 +78,7 @@ export function EntryCard({ entry }: { entry: Entry }) {
         )}
         <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-sm">
           {entry.links.map((link) => (
-            <SmartLink key={link.href} href={link.href} className="font-medium text-accent underline-offset-4 hover:underline">
+            <SmartLink key={link.href} href={link.href} className="font-medium text-accent underline underline-offset-4">
               {link.label}
             </SmartLink>
           ))}
