@@ -45,16 +45,17 @@ export default function KosmoviaPage() {
 
       <section aria-labelledby="etapas" className="pb-16">
         <SectionHeading id="etapas" index="02" title="Por etapas" />
-        <ol className="mt-6 border border-border bg-surface">
+        <p className="mt-4 text-sm text-muted">Primero Bolivia, después el mundo. De la A a la D en 2026; el resto en 2027.</p>
+        <ol className="mt-4 border border-border bg-surface">
           {kosmovia.stages.map((s) => (
             <li
               key={s.id}
-              className="grid grid-cols-[2.5rem_1fr] items-baseline gap-x-4 border-t border-border px-5 py-3 first:border-t-0 sm:grid-cols-[2.5rem_12rem_1fr_7rem]"
+              className={`grid grid-cols-[2.5rem_1fr] items-baseline gap-x-4 border-t border-border px-5 py-3 first:border-t-0 sm:grid-cols-[2.5rem_14rem_1fr_7rem] ${s.now ? "bg-accent-soft" : ""}`}
             >
               <span className="font-mono text-sm text-accent">{s.id}</span>
               <span className="font-display font-bold uppercase [font-stretch:104%]">{s.title}</span>
               <span className="col-start-2 text-sm text-muted sm:col-start-auto">{s.text}</span>
-              <span className="col-start-2 font-mono text-[11px] uppercase tracking-wider text-muted sm:col-start-auto sm:text-right">
+              <span className={`col-start-2 font-mono text-[11px] uppercase tracking-wider sm:col-start-auto sm:text-right ${s.now ? "text-accent" : "text-muted"}`}>
                 {s.when}
               </span>
             </li>

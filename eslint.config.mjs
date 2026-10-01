@@ -13,5 +13,6 @@ export default defineConfig([
       "@typescript-eslint/no-non-null-assertion": "error",
     },
   },
-  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts"]),
+  // .claude/ guarda worktrees de otras sesiones, con su propio .next.
+  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts", ".claude/**"]),
 ]);
