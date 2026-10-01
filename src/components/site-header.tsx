@@ -7,6 +7,7 @@ const NAV = [
   { href: "/", label: "Inicio" },
   { href: "/biblioteca", label: "Biblioteca" },
   { href: "/tareas", label: "Tareas" },
+  { href: "/kosmovia", label: "Kosmovia" },
 ];
 
 export function SiteHeader() {

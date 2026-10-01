@@ -3,6 +3,7 @@
 import { CONTRACT_TESTS, ORIGINAL, REPO, TTL_DAYS, explorer } from "@/lib/deployment";
 import { formatXlm } from "@/lib/format";
 import { MIN_INVESTMENT, RWA_REPO, RWA_RUN, RWA_TESTS, RWA_UPSTREAM } from "@/lib/rwa-deployment";
+import { kosmovia } from "./kosmovia";
 import type { Entry } from "./schema";
 
 const EXPLICACION = "/tareas/aex-pass/explicacion";
@@ -335,8 +336,9 @@ export const library: Entry[] = [
       "Red social para el ecosistema Stellar que construyo con mi equipo de Stellar Elite Bolivia: comunidades, un muro y una billetera integrada. En desarrollo, sobre testnet.",
     tags: ["Equipo", "En desarrollo"],
     links: [
-      { label: "GitHub", href: "https://github.com/kosmovia/kosmovia" },
-      { label: "Sitio", href: "https://kosmovia.vercel.app" },
+      { label: "GitHub", href: kosmovia.repo },
+      { label: "Sitio", href: kosmovia.site },
+      { label: "Página", href: "/kosmovia" },
     ],
     date: "2026-09-16",
     week: 3,

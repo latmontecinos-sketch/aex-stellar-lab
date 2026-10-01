@@ -119,7 +119,7 @@ export function SectionHeading({
 const BUTTON =
   "inline-flex h-11 items-center gap-2 rounded-sm px-5 font-mono text-xs font-medium uppercase tracking-wider transition-colors";
 
-/** Botón-enlace: `primary` en el acento, `secondary` con borde. */
+/** Botón-enlace: `primary` en el acento, `secondary` con borde. Si es externo, abre otra pestaña. */
 export function ButtonLink({
   href,
   variant = "primary",
@@ -133,7 +133,11 @@ export function ButtonLink({
     variant === "primary"
       ? "bg-accent text-surface hover:opacity-90"
       : "border border-text/25 bg-surface/60 text-text hover:border-accent hover:text-accent";
-  return (
+  return isExternal(href) ? (
+    <a href={href} target="_blank" rel="noreferrer" className={`${BUTTON} ${style}`}>
+      {children} ↗
+    </a>
+  ) : (
     <Link href={href} className={`${BUTTON} ${style}`}>
       {children} →
     </Link>

@@ -11,6 +11,7 @@ Una biblioteca personal de lo que voy aprendiendo en **Stellar Elite Bolivia**: 
 | `/` | Resumen: cuántas entradas hay, las tareas y lo último agregado |
 | `/biblioteca` | Todo ordenado en 8 secciones, con filtros por sección (`?tipo=clase`), por semana (`?semana=4`) y búsqueda |
 | `/tareas` | Las tareas del programa |
+| `/kosmovia` | Kosmovia, el proyecto de mi equipo (solo lo que ya es público) |
 | `/tareas/aex-pass` | Tarea Event Pass: consigna, checklist del entregable y qué sigo aprendiendo |
 | `/tareas/aex-pass/ejecucion` | Los 11 pasos reales con el Stellar CLI y el flujo para ejecutarlo desde el navegador |
 | `/tareas/aex-pass/explicacion` | Cómo funciona: reglas, recorrido de un pase, funciones, storage, errores y costos |
