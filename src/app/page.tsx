@@ -2,19 +2,23 @@ import Link from "next/link";
 import { EntryCard, TaskCard } from "@/components/cards";
 import { ButtonLink, SectionHeading } from "@/components/ui";
 import { library } from "@/content/library";
-import { KINDS, KIND_ORDER, byOrder, site } from "@/content/schema";
+import { KINDS, KIND_ORDER, site } from "@/content/schema";
 import { tasks } from "@/content/tasks";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
 export default function Home() {
-  const classes = library.filter((e) => e.kind === "clase").sort(byOrder);
-  const thisWeek = library
+  const active = library.filter((e) => !e.review);
+  const classes = active
+    .filter((e) => e.kind === "clase")
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 4);
+  const thisWeek = active
     .filter((e) => e.week === site.currentWeek && e.kind !== "clase")
     .sort((a, b) => b.date.localeCompare(a.date) || KIND_ORDER.indexOf(a.kind) - KIND_ORDER.indexOf(b.kind))
     .slice(0, 6);
   const stats = [
-    { value: library.length, label: "Entradas" },
+    { value: active.length, label: "Entradas" },
     { value: tasks.length, label: "Tareas" },
     { value: tasks.filter((t) => t.status === "entregado").length, label: "Entregadas" },
     { value: site.currentWeek, label: "Semana" },
@@ -87,7 +91,7 @@ export default function Home() {
         <SectionHeading
           id="clases"
           index="03"
-          title="Clases para repasar"
+          title="Últimas clases"
           link={{ href: "/biblioteca?tipo=clase", label: "Ver todas" }}
         />
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

@@ -67,6 +67,11 @@ export function EntryCard({ entry }: { entry: Entry }) {
         <h3 className="mt-3 text-lg font-bold leading-snug">{entry.title}</h3>
         {entry.author && <p className="mt-0.5 text-sm text-muted">por {entry.author}</p>}
         <p className="mt-1.5 flex-1 text-sm leading-relaxed text-muted">{entry.summary}</p>
+        {entry.review && (
+          <p className="mt-3 rounded-sm bg-warn-soft px-3 py-2 text-xs leading-relaxed text-text">
+            <strong>En revisión:</strong> {entry.review}
+          </p>
+        )}
         {entry.tags.length > 0 && (
           <ul className="mt-3 flex flex-wrap gap-x-3 gap-y-1" aria-label="Etiquetas">
             {entry.tags.map((tag) => (

@@ -34,6 +34,10 @@ export type Entry = {
   order?: number;
   /** Tarea relacionada, por su slug. */
   task?: string;
+  /** Id de la clase en la que se compartió: en la vista por semana va debajo de ella. */
+  session?: string;
+  /** Por qué quizás ya no sirve. Si está, la entrada va a "En revisión" y no se cuenta. */
+  review?: string;
 };
 
 export type TaskStatus = "pendiente" | "en-progreso" | "entregado";
@@ -59,7 +63,7 @@ export const site = {
   name: "Aex Stellar Lab",
   tagline: "Una biblioteca personal de lo que voy aprendiendo",
   program: "Stellar Elite Bolivia · 2026",
-  currentWeek: 4,
+  currentWeek: 5,
   author: "Alejandro Tintaya Montecinos",
   authorUrl: "https://latmontecinos.vercel.app",
   repo: "https://github.com/latmontecinos-sketch/aex-stellar-lab",
@@ -131,10 +135,24 @@ export const STATUS_LABELS: Record<TaskStatus, string> = {
   entregado: "Entregado",
 };
 
+const MONTHS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+
 export function formatDate(iso: string): string {
   const [y, m, d] = iso.split("-").map(Number);
-  const months = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
-  return `${d} ${months[m - 1]} ${y}`;
+  return `${d} ${MONTHS[m - 1]} ${y}`;
+}
+
+/** La semana 1 del programa empezó el lunes 31 de agosto de 2026. */
+const PROGRAM_START = Date.UTC(2026, 7, 31);
+const DAY = 86_400_000;
+
+/** Lunes a domingo de una semana del programa, por ejemplo "28 sep – 4 oct". */
+export function weekRange(week: number): string {
+  const day = (offset: number) => {
+    const date = new Date(PROGRAM_START + ((week - 1) * 7 + offset) * DAY);
+    return `${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]}`;
+  };
+  return `${day(0)} – ${day(6)}`;
 }
 
 /** Orden dentro de una sección: por `order` y, si falta, lo más reciente primero. */

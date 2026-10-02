@@ -9,7 +9,7 @@ Una biblioteca personal de lo que voy aprendiendo en **Stellar Elite Bolivia**: 
 | Ruta | Qué hay |
 |---|---|
 | `/` | Resumen: cuántas entradas hay, las tareas y lo último agregado |
-| `/biblioteca` | Todo ordenado en 8 secciones, con filtros por sección (`?tipo=clase`), por semana (`?semana=4`) y búsqueda |
+| `/biblioteca` | Por semana y clase (lo compartido en cada clase va debajo de ella) o por tipo (`?vista=tipo`), con filtros por sección (`?tipo=clase`), por semana (`?semana=4`) y búsqueda. Lo que quizás sobra queda plegado en "En revisión" |
 | `/tareas` | Las tareas del programa |
 | `/kosmovia` | Kosmovia, el proyecto de mi equipo (solo lo que ya es público) |
 | `/tareas/aex-pass` | Tarea Event Pass: consigna, checklist del entregable y qué sigo aprendiendo |
@@ -23,7 +23,7 @@ Una biblioteca personal de lo que voy aprendiendo en **Stellar Elite Bolivia**: 
 
 El contenido está en [`src/content/`](src/content):
 
-- **Una entrada de la biblioteca:** sumar un objeto a `library` en [`library.ts`](src/content/library.ts), con su sección en `kind` (`clase`, `apunte`, `documentacion`, `repositorio`, `skill`, `herramienta`, `lectura` o `comunidad`), título, resumen, etiquetas, links, fecha y semana del programa. Opcionales: `author`, `origin` (repos: `mio`, `comunidad` u `oficial`), `video` (id de YouTube, muestra la miniatura), `order` y `task` (slug de la tarea relacionada). El tipo `Entry` está en [`schema.ts`](src/content/schema.ts).
+- **Una entrada de la biblioteca:** sumar un objeto a `library` en [`library.ts`](src/content/library.ts), con su sección en `kind` (`clase`, `apunte`, `documentacion`, `repositorio`, `skill`, `herramienta`, `lectura` o `comunidad`), título, resumen, etiquetas, links, fecha y semana del programa. Opcionales: `author`, `origin` (repos: `mio`, `comunidad` u `oficial`), `video` (id de YouTube, muestra la miniatura), `order`, `task` (slug de la tarea relacionada), `session` (id de la clase en que se compartió) y `review` (por qué quizás ya no sirve: la manda a "En revisión"). El tipo `Entry` está en [`schema.ts`](src/content/schema.ts).
 - **La semana actual:** `site.currentWeek` en `schema.ts`. La portada muestra lo nuevo de esa semana.
 - **Una tarea nueva:** sumar un objeto a `tasks` en [`tasks.ts`](src/content/tasks.ts) y crear su carpeta en `src/app/tareas/<slug>/`, con `layout.tsx` (usa `TaskLayout`, que arma el encabezado y las pestañas), `page.tsx` (resumen, con `TaskVideo` y `DeliverableChecklist`), `ejecucion/` y `explicacion/`. Las de `aex-pass` y `rwa-launchpad` sirven de plantilla.
 
