@@ -9,6 +9,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
 
 export default function Home() {
   const active = library.filter((e) => !e.review);
+  const kinds = KIND_ORDER.filter((k) => active.some((e) => e.kind === k));
   const classes = active
     .filter((e) => e.kind === "clase")
     .sort((a, b) => b.date.localeCompare(a.date))
@@ -27,11 +28,7 @@ export default function Home() {
   return (
     <>
       <section className="pt-16 pb-16 sm:pt-24 sm:pb-24">
-        <p className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-muted">
-          <span aria-hidden className="h-2 w-2 bg-accent" />
-          {site.program} · Semana {site.currentWeek}
-        </p>
-        <h1 className="mt-6 text-5xl leading-[0.92] font-extrabold uppercase [font-stretch:125%] sm:text-7xl lg:text-8xl">
+        <h1 className="text-5xl leading-[0.92] font-extrabold uppercase [font-stretch:125%] sm:text-7xl lg:text-8xl">
           Aex
           <br />
           Stellar Lab
@@ -41,6 +38,9 @@ export default function Home() {
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
           <ButtonLink href="/biblioteca">Biblioteca</ButtonLink>
+          <ButtonLink href="/guia" variant="secondary">
+            Guía
+          </ButtonLink>
           <ButtonLink href="/tareas" variant="secondary">
             Tareas
           </ButtonLink>
@@ -58,7 +58,7 @@ export default function Home() {
       <section aria-labelledby="secciones" className="pb-16">
         <SectionHeading id="secciones" index="01" title="Secciones" />
         <ul className="mt-6 grid gap-px overflow-hidden border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
-          {KIND_ORDER.map((kind, i) => (
+          {kinds.map((kind, i) => (
             <li key={kind} className="bg-surface">
               <Link
                 href={`/biblioteca?tipo=${kind}`}
@@ -66,7 +66,7 @@ export default function Home() {
               >
                 <span className="flex items-baseline justify-between gap-3 font-mono text-xs text-muted">
                   <span>{pad(i + 1)}</span>
-                  <span className="text-sm text-text">{pad(library.filter((e) => e.kind === kind).length)}</span>
+                  <span className="text-sm text-text">{pad(active.filter((e) => e.kind === kind).length)}</span>
                 </span>
                 <span className="mt-4 font-display font-bold uppercase [font-stretch:112%] group-hover:text-accent">
                   {KINDS[kind].many}

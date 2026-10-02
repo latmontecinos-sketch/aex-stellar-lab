@@ -21,7 +21,7 @@ Estas reglas salen de la auditoría del 2026-09-23. Casi todo el código lo escr
 
 ## Datos y contenido
 - Una sola fuente por dato: ids, hashes, transacciones, comisiones, errores y conteos del contrato viven en `src/lib/deployment.ts`. Antes de escribir un literal, buscarlo con grep. El README enlaza, no copia cifras.
-- Contenido en `src/content/`: `library.ts` (entradas), `tasks.ts` (tareas) y `schema.ts` (tipos y config). Un componente de cliente no importa `library.ts`.
+- Contenido en `src/content/`: `library.ts` (entradas), `class-notes.ts` (apuntes de clase), `guide.ts` (la guía, con ids de la biblioteca), `tasks.ts` (tareas) y `schema.ts` (tipos y config). Un componente de cliente no importa `library.ts`.
 - Ninguna página de contenido lee `searchParams` en el servidor: los filtros se leen con `useSearchParams` dentro de `<Suspense>`, así la página sigue estática.
 
 ## Código

@@ -10,6 +10,8 @@ Una biblioteca personal de lo que voy aprendiendo en **Stellar Elite Bolivia**: 
 |---|---|
 | `/` | Resumen: cuántas entradas hay, las tareas y lo último agregado |
 | `/biblioteca` | Por semana y clase (lo compartido en cada clase va debajo de ella) o por tipo (`?vista=tipo`), con filtros por sección (`?tipo=clase`), por semana (`?semana=4`) y búsqueda. Lo que quizás sobra queda plegado en "En revisión" |
+| `/biblioteca/clase/<id>` | Los apuntes de una clase: temas con su minuto, conceptos, comandos, preguntas de repaso y conclusiones |
+| `/guia` | Cómo construir en Stellar semana a semana: qué lograr, qué hacer y qué recursos de la biblioteca usar |
 | `/tareas` | Las tareas del programa |
 | `/kosmovia` | Kosmovia, el proyecto de mi equipo (solo lo que ya es público) |
 | `/tareas/aex-pass` | Tarea Event Pass: consigna, checklist del entregable y qué sigo aprendiendo |
@@ -24,6 +26,8 @@ Una biblioteca personal de lo que voy aprendiendo en **Stellar Elite Bolivia**: 
 El contenido está en [`src/content/`](src/content):
 
 - **Una entrada de la biblioteca:** sumar un objeto a `library` en [`library.ts`](src/content/library.ts), con su sección en `kind` (`clase`, `apunte`, `documentacion`, `repositorio`, `skill`, `herramienta`, `lectura` o `comunidad`), título, resumen, etiquetas, links, fecha y semana del programa. Opcionales: `author`, `origin` (repos: `mio`, `comunidad` u `oficial`), `video` (id de YouTube, muestra la miniatura), `order`, `task` (slug de la tarea relacionada), `session` (id de la clase en que se compartió) y `review` (por qué quizás ya no sirve: la manda a "En revisión"). El tipo `Entry` está en [`schema.ts`](src/content/schema.ts).
+- **Apuntes de una clase:** sumar un objeto a `classNotes` en [`class-notes.ts`](src/content/class-notes.ts) con el id de la clase en `session`. Su tarjeta muestra el enlace "Apuntes" y la página se crea sola.
+- **Un paso de la guía:** editar `guide` en [`guide.ts`](src/content/guide.ts). Los recursos son ids de la biblioteca; si uno no existe, el build falla.
 - **La semana actual:** `site.currentWeek` en `schema.ts`. La portada muestra lo nuevo de esa semana.
 - **Una tarea nueva:** sumar un objeto a `tasks` en [`tasks.ts`](src/content/tasks.ts) y crear su carpeta en `src/app/tareas/<slug>/`, con `layout.tsx` (usa `TaskLayout`, que arma el encabezado y las pestañas), `page.tsx` (resumen, con `TaskVideo` y `DeliverableChecklist`), `ejecucion/` y `explicacion/`. Las de `aex-pass` y `rwa-launchpad` sirven de plantilla.
 

@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 const NAV = [
   { href: "/", label: "Inicio" },
   { href: "/biblioteca", label: "Biblioteca" },
+  { href: "/guia", label: "Guía" },
   { href: "/tareas", label: "Tareas" },
   { href: "/kosmovia", label: "Kosmovia" },
 ];
@@ -25,7 +26,8 @@ export function SiteHeader() {
         <nav aria-label="Principal">
           <ul className="flex gap-4 font-mono text-[11px] uppercase tracking-wider sm:gap-7 sm:text-xs">
             {NAV.map((item) => (
-              <li key={item.href}>
+              // En el teléfono el logo ya lleva al inicio, y así entran todas.
+              <li key={item.href} className={item.href === "/" ? "hidden sm:block" : undefined}>
                 <Link
                   href={item.href}
                   aria-current={isActive(item.href) ? "page" : undefined}

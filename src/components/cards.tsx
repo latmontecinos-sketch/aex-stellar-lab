@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { KINDS, ORIGIN_LABELS, STATUS_LABELS, formatDate, formatDue, type Entry, type Kind, type Task } from "@/content/schema";
+import { notesFor } from "@/content/class-notes";
 import { tasks } from "@/content/tasks";
 import { SmartLink } from "@/components/ui";
 
@@ -28,6 +29,7 @@ const STATUS_STYLES: Record<Task["status"], string> = {
 export function EntryCard({ entry }: { entry: Entry }) {
   const task = entry.task ? tasks.find((t) => t.slug === entry.task) : undefined;
   const primary = entry.links[0];
+  const hasNotes = Boolean(notesFor(entry.id));
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface">
       {entry.video && primary && (
@@ -87,6 +89,14 @@ export function EntryCard({ entry }: { entry: Entry }) {
               {link.label}
             </SmartLink>
           ))}
+          {hasNotes && (
+            <Link
+              href={`/biblioteca/clase/${entry.id}`}
+              className="font-medium text-accent underline underline-offset-4"
+            >
+              Apuntes
+            </Link>
+          )}
           {task && (
             <Link
               href={`/tareas/${task.slug}`}
