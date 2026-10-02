@@ -590,6 +590,25 @@ export const library: Entry[] = [
     order: 4,
     session: "clase-vibe-coding",
   },
+  {
+    id: "pollar",
+    title: "Pollar",
+    kind: "skill",
+    origin: "comunidad",
+    author: "Pollar",
+    summary:
+      "Un SDK para que tus usuarios entren con Google, GitHub o email y tengan wallet sin ver seed phrases: activa la cuenta, crea trustlines, paga las comisiones y mueve USDC. Trae una skill y un MCP para tu agente.",
+    tags: ["Onboarding", "Wallets", "USDC", "IA"],
+    links: [
+      { label: "Documentación", href: "https://docs.pollar.xyz/docs" },
+      { label: "GitHub", href: "https://github.com/pollar-xyz/pollar" },
+      { label: "Skill", href: "https://github.com/pollar-xyz/pollar/tree/main/skills/pollar-wallet-auth" },
+    ],
+    date: "2026-10-01",
+    week: 5,
+    order: 5,
+    session: "clase-vibe-coding",
+  },
 
   // ── Herramientas ───────────────────────────────────────────────────
   {

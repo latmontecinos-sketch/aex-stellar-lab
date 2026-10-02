@@ -73,7 +73,7 @@ export const guide: GuideStep[] = [
     goal: "Que una página llame a tu contrato con la wallet del usuario y muestre bien los errores.",
     steps: [
       "Genera los bindings de TypeScript de tu contrato.",
-      "Llama al contrato con stellar-sdk y firma con Freighter.",
+      "Llama al contrato con stellar-sdk y firma con Freighter. Si tus usuarios no tienen wallet, Pollar les crea una con su login.",
       "Si hace falta, arma un backend que prepare las transacciones.",
       "Simula antes de enviar y traduce los errores para el usuario.",
     ],
@@ -82,6 +82,7 @@ export const guide: GuideStep[] = [
       "semana-4-clase-25",
       "docs-bindings",
       "stellar-sdk-js",
+      "pollar",
       "simular",
       "docs-seps",
       "stellar-lab",
@@ -96,7 +97,7 @@ export const guide: GuideStep[] = [
     steps: [
       "Planifica antes de pedir código: objetivo, alcance y arquitectura.",
       "Conecta tu agente a Stellar con un MCP (Raven) y las skills oficiales.",
-      "Suma piezas del ecosistema: precios con Reflector y escrow con Trustless Work.",
+      "Suma piezas del ecosistema: login y wallets con Pollar, precios con Reflector y escrow con Trustless Work.",
       "Revisa lo que hace el agente y vigila los tokens.",
     ],
     resources: [
@@ -107,6 +108,7 @@ export const guide: GuideStep[] = [
       "openzeppelin-mcp",
       "stellar-expert-mcp",
       "reflector-skill",
+      "pollar",
       "trustless-blocks",
       "v0",
     ],
