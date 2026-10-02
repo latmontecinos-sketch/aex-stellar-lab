@@ -1,5 +1,6 @@
 // La biblioteca: una entrada por cosa que llega del programa. Para agregar
 // algo, se suma una entrada a `library` (ver el tipo `Entry` en schema.ts).
+// El resumen dice, corto, qué hace o qué enseña.
 import { CONTRACT_TESTS, ORIGINAL, REPO, TTL_DAYS, explorer } from "@/lib/deployment";
 import { formatXlm } from "@/lib/format";
 import { MIN_INVESTMENT, RWA_REPO, RWA_RUN, RWA_TESTS, RWA_UPSTREAM } from "@/lib/rwa-deployment";
@@ -7,123 +8,134 @@ import { kosmovia } from "./kosmovia";
 import type { Entry } from "./schema";
 
 const EXPLICACION = "/tareas/aex-pass/explicacion";
-const SKILLS = "https://github.com/latmontecinos-sketch/Stellar-Build/tree/main/.claude/skills";
+const STELLAR_BUILD = "https://github.com/latmontecinos-sketch/Stellar-Build";
 const yt = (id: string) => `https://www.youtube.com/watch?v=${id}`;
 
-function skill(name: string, summary: string, order: number): Entry {
+/** Una clase grabada en YouTube. */
+function clase(
+  id: string,
+  title: string,
+  video: string,
+  date: string,
+  week: number,
+  order: number,
+  author: string,
+  summary: string,
+  tags: string[],
+  extra: Partial<Entry> = {},
+): Entry {
   return {
-    id: `skill-${name}`,
-    title: name,
-    kind: "skill",
+    id,
+    title,
+    kind: "clase",
     summary,
-    tags: ["Claude Code", "Stellar Build"],
-    links: [{ label: "Ver la skill", href: `${SKILLS}/${name}` }],
-    date: "2026-09-06",
-    week: 1,
+    tags,
+    links: [{ label: "YouTube", href: yt(video) }],
+    author,
+    video,
+    date,
+    week,
     order,
-    review: "Una tarjeta por skill es demasiado: basta con Stellar Build y el catálogo oficial.",
+    ...extra,
   };
 }
 
 export const library: Entry[] = [
   // ── Clases y videos ────────────────────────────────────────────────
-  {
-    id: "clase-1",
-    title: "Sesión 1: Smart Contracts",
-    kind: "clase",
-    summary: "Primera clase del bootcamp de contratos inteligentes de Stellar Elite Bolivia.",
-    tags: ["Bootcamp", "Soroban"],
-    links: [{ label: "YouTube", href: yt("fnrLiRpMHXE") }],
-    author: "Emmi",
-    video: "fnrLiRpMHXE",
-    date: "2026-09-14",
-    week: 3,
-    order: 1,
-  },
-  {
-    id: "clase-2",
-    title: "Clase 2: Smart Contracts",
-    kind: "clase",
-    summary: "Segunda clase del bootcamp, del 16 de septiembre.",
-    tags: ["Bootcamp", "Soroban"],
-    links: [{ label: "YouTube", href: yt("jJtw_85WJjA") }],
-    author: "Leonardo Vaca",
-    video: "jJtw_85WJjA",
-    date: "2026-09-16",
-    week: 3,
-    order: 2,
-  },
-  {
-    id: "clase-3",
-    title: "Clase 3: Smart Contracts",
-    kind: "clase",
-    summary:
-      "Tercera clase del bootcamp, del 17 de septiembre: la de los tres tracks del entregable (event pass, votación y sponsor board).",
-    tags: ["Bootcamp", "Soroban"],
-    links: [{ label: "YouTube", href: yt("kmq_19PtAzc") }],
-    author: "Leonardo Vaca",
-    video: "kmq_19PtAzc",
-    date: "2026-09-17",
-    week: 3,
-    order: 3,
-    task: "aex-pass",
-  },
-  {
-    id: "semana-4-sesion-2",
-    title: "Sesión 2: Front-end y Back-end",
-    kind: "clase",
-    summary: "Segunda clase de la semana 4, sobre front-end y back-end. Subida el 27 de septiembre.",
-    tags: ["Bootcamp", "Frontend"],
-    links: [{ label: "YouTube", href: yt("QIjwNNl13QY") }],
-    author: "Emmi",
-    video: "QIjwNNl13QY",
-    date: "2026-09-27",
-    week: 4,
-    order: 2,
-  },
-  {
-    id: "semana-4-clase-25",
-    title: "Clase 25/09: Front-end y Back-end",
-    kind: "clase",
-    summary: "Clase del 25 de septiembre, también sobre front-end y back-end.",
-    tags: ["Bootcamp", "Frontend"],
-    links: [{ label: "YouTube", href: yt("C3Zj462nkNA") }],
-    author: "Ady",
-    video: "C3Zj462nkNA",
-    date: "2026-09-25",
-    week: 4,
-    order: 3,
-  },
-  {
-    id: "semana-5-sesion-1",
-    title: "Sesión 1: Vibecoding e IA",
-    kind: "clase",
-    summary: "Primera clase de la semana 5, sobre vibecoding e IA.",
-    tags: ["Bootcamp", "IA"],
-    links: [{ label: "YouTube", href: yt("d5OWaSqWR3I") }],
-    author: "Emmi",
-    video: "d5OWaSqWR3I",
-    date: "2026-09-28",
-    week: 5,
-    order: 1,
-  },
-  {
-    id: "clase-vibe-coding",
-    title: "Jueves 1/10: Vibe coding",
-    kind: "clase",
-    summary:
-      "Clase con un vibecoder que construye muchos proyectos en Stellar. Compartió sus herramientas: van debajo. Todavía sin grabación.",
-    tags: ["Bootcamp", "IA"],
-    links: [],
-    date: "2026-10-01",
-    week: 5,
-    order: 2,
-  },
+  clase(
+    "semana-1-introduccion",
+    "Sesión de introducción",
+    "NyapZNr0qQM",
+    "2026-09-04",
+    1,
+    1,
+    "Emmi",
+    "La sesión que abre Stellar Elite Bolivia. El video no tiene subtítulos, así que todavía no tiene resumen.",
+    ["Introducción"],
+  ),
+  clase(
+    "semana-1-sesion-3",
+    "Sesión 3: Introducción",
+    "EvP1kuw4eNs",
+    "2026-09-05",
+    1,
+    2,
+    "Emmi",
+    "Cómo ganar experiencia, y a veces pagos, con código abierto en GrantFox y Drips, y cómo Stellar Build ayuda a validar una idea para Stellar con agentes de IA.",
+    ["Código abierto", "Stellar Build", "SCF"],
+  ),
+  clase(
+    "semana-2-sesion-1",
+    "Sesión 1: Producto",
+    "6gXEagoi7xc",
+    "2026-09-07",
+    2,
+    1,
+    "Emmi",
+    "Aprender del cliente antes de construir: supuestos, entrevistas a usuarios, cómo definir bien el problema, arquetipos, MVP y formas de financiar un producto.",
+    ["Producto", "Entrevistas", "MVP"],
+  ),
+  clase(
+    "semana-2-sesion-2",
+    "Sesión 2: Producto",
+    "k6KfyUGna7Y",
+    "2026-09-08",
+    2,
+    2,
+    "Emmi",
+    "De lo que aprendiste del cliente a qué construir: el valor, el ajuste problema-solución, el alcance del MVP, los documentos para la IA y por qué lanzar rápido.",
+    ["Producto", "MVP", "PRD"],
+  ),
+  clase(
+    "semana-2-sesion-3",
+    "Sesión 3: Producto",
+    "NGf1Jo4O4g8",
+    "2026-09-09",
+    2,
+    3,
+    "Emmi",
+    "Cómo llegar a los usuarios con canales y alianzas, medir la tracción y contar la historia del producto para pedir grants o inversión.",
+    ["Distribución", "Métricas", "Pitch"],
+  ),
+  clase(
+    "clase-1",
+    "Sesión 1: Smart Contracts",
+    "fnrLiRpMHXE",
+    "2026-09-14",
+    3,
+    1,
+    "Emmi",
+    "Qué es un contrato en Stellar: se escribe en Rust, se compila a Wasm y guarda datos en tres tipos de storage. Instala Rust y el Stellar CLI y corre un contrato contador.",
+    ["Soroban", "Rust", "Storage"],
+  ),
+  clase(
+    "clase-2",
+    "Clase 16/09: Smart Contracts",
+    "jJtw_85WJjA",
+    "2026-09-16",
+    3,
+    2,
+    "Leonardo Vaca",
+    "Cómo un contrato decide quién puede hacer qué (require_auth), maneja estados, errores y eventos. Corrige un bug de autorización, prueba el contrato y lo despliega en testnet.",
+    ["Soroban", "Auth", "Tests"],
+  ),
+  clase(
+    "clase-3",
+    "Clase 17/09: Smart Contracts",
+    "kmq_19PtAzc",
+    "2026-09-17",
+    3,
+    3,
+    "Leonardo Vaca",
+    "Tokens en Stellar (assets clásicos y contratos de token), oráculos de precio y Solang. Invoca un contrato con el CLI, el UI Builder y Stellar Lab, y presenta el entregable.",
+    ["Tokens", "Oráculos", "OpenZeppelin"],
+    { task: "aex-pass" },
+  ),
   {
     id: "curso-fabian",
     title: "Las bases del desarrollo en Stellar: el primer smart contract",
     kind: "clase",
-    summary: "Curso de Fabián Sánchez, recomendado para repasar desde cero cómo se crea un contrato.",
+    summary: "Curso para repasar desde cero cómo se crea un contrato en Stellar.",
     tags: ["Curso", "Soroban"],
     links: [{ label: "YouTube", href: yt("uyTsLnzYgFs") }],
     author: "Fabián Sánchez",
@@ -132,6 +144,50 @@ export const library: Entry[] = [
     week: 3,
     order: 4,
   },
+  clase(
+    "semana-4-sesion-2",
+    "Sesión 2: Front-end y Back-end",
+    "QIjwNNl13QY",
+    "2026-09-27",
+    4,
+    2,
+    "Emmi",
+    "Cómo conectar un contrato de token con una web: llamar sus funciones, firmar con Freighter y mostrar los errores del contrato en palabras que el usuario entienda.",
+    ["Frontend", "Freighter", "SEP-41"],
+  ),
+  clase(
+    "semana-4-clase-25",
+    "Clase 25/09: Front-end y Back-end",
+    "C3Zj462nkNA",
+    "2026-09-25",
+    4,
+    3,
+    "Ady",
+    "Cómo comprobar quién es el dueño de una wallet (también con passkeys), guardar datos en caché con Redis y armar un backend que prepara transacciones para firmar.",
+    ["Backend", "Wallets", "Passkeys"],
+  ),
+  clase(
+    "semana-5-sesion-1",
+    "Sesión 1: Vibecoding e IA",
+    "d5OWaSqWR3I",
+    "2026-09-28",
+    5,
+    1,
+    "Emmi",
+    "Del vibecoding a programar con IA en serio: planificar antes de pedir código, revisar lo que hace el agente y entender los tokens y la ventana de contexto.",
+    ["IA", "Planificación"],
+  ),
+  clase(
+    "clase-vibe-coding",
+    "Sesión 2 y 3: Vibecoding e IA",
+    "OvesLVcciKE",
+    "2026-10-01",
+    5,
+    2,
+    "Emmi",
+    "Brandon, autor de stellar-expert-mcp y reflector-skill, arma desde cero una app para cambiar cripto entre personas (OTC) en Stellar, con Cursor, MCPs, skills y un plan por fases.",
+    ["IA", "MCP", "Skills"],
+  ),
 
   // ── Mis apuntes ────────────────────────────────────────────────────
   {
@@ -139,7 +195,7 @@ export const library: Entry[] = [
     title: "Anatomía de un contrato Soroban",
     kind: "apunte",
     summary:
-      "Un contrato es un struct con #[contract] y sus funciones en #[contractimpl]. __constructor corre una sola vez, al desplegar. Los datos van en storage (instance para la configuración, persistent para lo de cada usuario), los errores se tipan con #[contracterror] y los avisos públicos se publican con #[contractevent].",
+      "Las partes de un contrato: #[contract] y #[contractimpl], el constructor que corre una vez, el storage (instance y persistent), los errores tipados y los eventos.",
     tags: ["Soroban", "Rust"],
     links: [{ label: "Ver en Aex Pass", href: `${EXPLICACION}#funciones` }],
     date: "2026-09-22",
@@ -152,7 +208,7 @@ export const library: Entry[] = [
     title: "Autorización con require_auth",
     kind: "apunte",
     summary:
-      "require_auth exige que esa cuenta haya firmado esta llamada exacta. La firma del comprador cubre buy y también la transferencia que el contrato hace adentro. Para roles como el anfitrión, la dirección se lee del storage y no de un parámetro: así nadie se hace pasar por él.",
+      "Cómo un contrato exige la firma de una cuenta, y por qué un rol como el anfitrión se lee del storage y no de un parámetro: así nadie se hace pasar por él.",
     tags: ["Soroban", "Seguridad"],
     links: [{ label: "Ver en Aex Pass", href: `${EXPLICACION}#reglas` }],
     date: "2026-09-22",
@@ -165,7 +221,7 @@ export const library: Entry[] = [
     title: "Simular antes de enviar",
     kind: "apunte",
     summary:
-      "El CLI y el SDK simulan cada transacción antes de enviarla. Si la simulación falla, por ejemplo con Error(Contract, #4), no se envía nada ni se cobra. Las lecturas como pass_of solo se simulan: no cuestan.",
+      "Cada transacción se simula antes de enviarse: si falla, no se envía ni se cobra. Las lecturas solo se simulan, así que no cuestan.",
     tags: ["Stellar CLI", "stellar-sdk"],
     links: [{ label: "Ver en Aex Pass", href: `${EXPLICACION}#errores` }],
     date: "2026-09-22",
@@ -177,8 +233,7 @@ export const library: Entry[] = [
     id: "renta-ttl",
     title: "Renta y TTL del storage",
     kind: "apunte",
-    summary:
-      `Cada dato guardado tiene un tiempo de vida (TTL) y mantenerlo cuesta renta. Mi primera compra cobró ${formatXlm(ORIGINAL.buy.feeStroops, 2)} XLM porque extendía el pase, el contrato y su código a ${TTL_DAYS} días. Lección: ajustar el plazo a la duración real del evento.`,
+    summary: `Cada dato guardado vence (TTL) y mantenerlo cuesta renta. Mi primera compra costó ${formatXlm(ORIGINAL.buy.feeStroops, 2)} XLM por extenderlo ${TTL_DAYS} días: conviene ajustar el plazo al evento.`,
     tags: ["Soroban", "Costos"],
     links: [{ label: "Ver en Aex Pass", href: `${EXPLICACION}#costos` }],
     date: "2026-09-22",
@@ -191,7 +246,7 @@ export const library: Entry[] = [
     title: "Comandos esenciales del Stellar CLI",
     kind: "apunte",
     summary:
-      "keys generate --fund crea y fondea una cuenta de prueba. contract build compila a WASM. contract deploy publica el contrato (los argumentos del constructor van después de --). contract invoke llama a una función; con --send=no solo simula.",
+      "Qué hace cada uno: keys generate --fund crea una cuenta de prueba, contract build compila, contract deploy publica y contract invoke llama (con --send=no solo simula).",
     tags: ["Stellar CLI"],
     links: [{ label: "Ver la ejecución completa", href: "/tareas/aex-pass/ejecucion" }],
     date: "2026-09-22",
@@ -204,14 +259,9 @@ export const library: Entry[] = [
     title: "Leer una transacción en stellar.expert",
     kind: "apunte",
     summary:
-      "En la página de una transacción, la flecha ⇊ despliega el detalle: qué contrato se invocó, las transferencias, los eventos, los datos creados o actualizados en el storage, los recursos usados y la comisión.",
+      "Dónde ver, en una transacción, el contrato que se invocó, las transferencias, los eventos, lo que cambió en el storage y la comisión.",
     tags: ["Explorador"],
-    links: [
-      {
-        label: "Ejemplo: la compra de Aex Pass",
-        href: explorer.tx(ORIGINAL.buy.tx),
-      },
-    ],
+    links: [{ label: "Ejemplo: la compra de Aex Pass", href: explorer.tx(ORIGINAL.buy.tx) }],
     date: "2026-09-22",
     week: 4,
     order: 6,
@@ -234,8 +284,7 @@ export const library: Entry[] = [
     id: "docs-assets",
     title: "Assets: panorama y comparación",
     kind: "documentacion",
-    summary:
-      "Qué es un asset en Stellar y en qué se diferencian un asset clásico y un token de contrato, para saber cuándo usar cada uno.",
+    summary: "Qué es un asset en Stellar y cuándo usar un asset clásico o un token de contrato.",
     tags: ["Oficial", "Assets"],
     links: [{ label: "developers.stellar.org", href: "https://developers.stellar.org/docs/tokens/anatomy-of-an-asset" }],
     date: "2026-09-17",
@@ -246,8 +295,7 @@ export const library: Entry[] = [
     id: "docs-sac",
     title: "Desplegar el Stellar Asset Contract (SAC)",
     kind: "documentacion",
-    summary:
-      "Receta del CLI para exponer un asset clásico como contrato y usarlo desde Soroban. Es lo que permite que Aex Pass cobre en XLM.",
+    summary: "Cómo usar un asset clásico, como XLM o USDC, desde un contrato. Así cobra Aex Pass en XLM.",
     tags: ["Oficial", "Stellar CLI", "Assets"],
     links: [
       {
@@ -263,8 +311,7 @@ export const library: Entry[] = [
     id: "docs-openzeppelin",
     title: "OpenZeppelin para Stellar",
     kind: "documentacion",
-    summary:
-      "Contratos y librerías auditadas para Soroban (tokens, control de acceso, pausas y actualizaciones), para no reinventar lo básico.",
+    summary: "Contratos auditados listos para usar: tokens, permisos, pausas y actualizaciones. Para no reinventar lo básico.",
     tags: ["Seguridad", "Tokens"],
     links: [
       { label: "En Stellar Docs", href: "https://developers.stellar.org/docs/tools/openzeppelin-contracts" },
@@ -275,29 +322,10 @@ export const library: Entry[] = [
     order: 4,
   },
   {
-    id: "docs-solang",
-    review: "Solo sirve si vienes de Solidity.",
-    title: "Solang: qué de Solidity funciona en Soroban",
-    kind: "documentacion",
-    summary:
-      "La tabla de compatibilidad del compilador Solang, que lleva Solidity a Soroban. Útil para quien viene de EVM.",
-    tags: ["Solidity", "EVM"],
-    links: [
-      {
-        label: "solang.readthedocs.io",
-        href: "https://solang.readthedocs.io/en/latest/targets/soroban_support_matrix.html",
-      },
-    ],
-    date: "2026-09-17",
-    week: 3,
-    order: 5,
-  },
-  {
     id: "docs-seps",
     title: "Stellar Ecosystem Proposals (SEPs)",
     kind: "documentacion",
-    summary:
-      "Los estándares del ecosistema (wallets, anclas, tokens y más) que permiten que las apps de Stellar se entiendan entre sí.",
+    summary: "Los estándares que hacen que wallets, anclas y apps de Stellar se entiendan entre sí.",
     tags: ["Oficial", "Estándares"],
     links: [
       {
@@ -313,8 +341,7 @@ export const library: Entry[] = [
     id: "docs-bindings",
     title: "Generar bindings de TypeScript",
     kind: "documentacion",
-    summary:
-      "Del tutorial guestbook: cómo generar un cliente TypeScript desde un contrato para llamarlo desde el frontend.",
+    summary: "Cómo generar un cliente TypeScript de tu contrato para llamarlo desde el frontend.",
     tags: ["Oficial", "Frontend", "TypeScript"],
     links: [{ label: "developers.stellar.org", href: "https://developers.stellar.org/docs/build/apps/guestbook/bindings" }],
     date: "2026-09-21",
@@ -325,7 +352,7 @@ export const library: Entry[] = [
     id: "soroban-sdk-docs",
     title: "Referencia de soroban-sdk",
     kind: "documentacion",
-    summary: "La documentación de la librería de Rust para contratos: tipos, storage, auth, tokens y eventos.",
+    summary: "La referencia de la librería de Rust para contratos: tipos, storage, auth, tokens y eventos.",
     tags: ["Rust"],
     links: [{ label: "docs.rs", href: "https://docs.rs/soroban-sdk" }],
     date: "2026-09-22",
@@ -338,7 +365,7 @@ export const library: Entry[] = [
     kind: "documentacion",
     author: "Trustless Work",
     summary:
-      "Componentes de React listos para sumar pagos con escrow a una app Next.js, pensados para armarla con IA. Se instalan con su CLI.",
+      "Componentes de React para sumar pagos con escrow a una app Next.js. Se instalan con su CLI y están pensados para armar la app con IA.",
     tags: ["Escrow", "React", "IA"],
     links: [
       {
@@ -374,8 +401,7 @@ export const library: Entry[] = [
     title: "Aex Pass",
     kind: "repositorio",
     origin: "mio",
-    summary:
-      `El contrato Event Pass en Rust con soroban-sdk: pase para un Meet que se compra una vez y se usa una vez. Incluye sus ${CONTRACT_TESTS} pruebas y la demo del Stellar CLI.`,
+    summary: `Mi contrato de pases para un evento: el pase se compra una vez y se usa una vez. Con ${CONTRACT_TESTS} pruebas y la demo del Stellar CLI.`,
     tags: ["Soroban", "Rust", "Testnet"],
     links: [
       { label: "GitHub", href: REPO },
@@ -391,7 +417,7 @@ export const library: Entry[] = [
     title: "RWA Launchpad (mi fork)",
     kind: "repositorio",
     origin: "mio",
-    summary: `El launchpad del bootcamp con mi regla: invertir al menos ${MIN_INVESTMENT}, o falla con AmountTooLow. Con ${RWA_TESTS} tests y los scripts listos para testnet.`,
+    summary: `Mi versión del launchpad del bootcamp: exige invertir al menos ${MIN_INVESTMENT}, o falla con AmountTooLow. Con ${RWA_TESTS} tests y scripts para testnet.`,
     tags: ["Soroban", "Rust", "RWA", "Testnet"],
     links: [
       { label: "GitHub", href: RWA_REPO },
@@ -403,26 +429,12 @@ export const library: Entry[] = [
     task: "rwa-launchpad",
   },
   {
-    id: "aex-stellar-lab",
-    review: "Es este mismo sitio: el enlace ya está al pie de cada página.",
-    title: "Aex Stellar Lab",
-    kind: "repositorio",
-    origin: "mio",
-    summary:
-      "Este sitio: Next.js 16 y @stellar/stellar-sdk. Aquí viven la biblioteca y la ejecución interactiva de cada tarea, directo contra testnet desde el navegador.",
-    tags: ["Next.js", "stellar-sdk"],
-    links: [{ label: "GitHub", href: "https://github.com/latmontecinos-sketch/aex-stellar-lab" }],
-    date: "2026-09-22",
-    week: 4,
-    order: 2,
-  },
-  {
     id: "kosmovia",
     title: "Kosmovia",
     kind: "repositorio",
     origin: "mio",
     summary:
-      "Red social para el ecosistema Stellar que construyo con mi equipo de Stellar Elite Bolivia: comunidades, un muro y una billetera integrada. En desarrollo, sobre testnet.",
+      "La red social para el ecosistema Stellar que construyo con mi equipo: comunidades, un muro y una billetera integrada. En desarrollo, sobre testnet.",
     tags: ["Equipo", "En desarrollo"],
     links: [
       { label: "GitHub", href: kosmovia.repo },
@@ -434,26 +446,13 @@ export const library: Entry[] = [
     order: 3,
   },
   {
-    id: "stellar-build",
-    title: "Stellar Build",
-    kind: "repositorio",
-    origin: "mio",
-    summary:
-      "Repositorio base del programa, creado desde el template oficial stellar-build-toolkit: las skills de Claude Code con las que construyo. Fue mi primer entregable.",
-    tags: ["Toolkit", "Claude Code"],
-    links: [{ label: "GitHub", href: "https://github.com/latmontecinos-sketch/Stellar-Build" }],
-    date: "2026-09-06",
-    week: 1,
-    order: 4,
-  },
-  {
     id: "rwa-launchpad",
     title: "RWA Launchpad (bootcamp)",
     kind: "repositorio",
     origin: "comunidad",
     author: "Oppia Software Labs",
     summary:
-      "Repo base del bootcamp de contratos de Stellar Bolivia (días 1 a 3): un launchpad de activos del mundo real (RWA) en Soroban, con TypeScript.",
+      "El repo base del bootcamp: un launchpad que vende tokens de activos reales (RWA) en Soroban, con su frontend en TypeScript.",
     tags: ["Bootcamp", "RWA", "Soroban"],
     links: [{ label: "GitHub", href: RWA_UPSTREAM }],
     date: "2026-09-21",
@@ -468,7 +467,7 @@ export const library: Entry[] = [
     origin: "comunidad",
     author: "Trustless Work",
     summary:
-      "Infraestructura de escrow sin permisos sobre Soroban y USDC que cualquier plataforma puede integrar. Un contrato real en producción para estudiar.",
+      "Un escrow en producción: guarda USDC hasta que se cumple lo acordado y cualquier plataforma lo puede integrar. Bueno para estudiar un contrato real.",
     tags: ["Escrow", "USDC", "Rust"],
     links: [{ label: "GitHub", href: "https://github.com/Trustless-Work/trustlesswork-smart-contract-stellar" }],
     date: "2026-09-21",
@@ -482,7 +481,7 @@ export const library: Entry[] = [
     origin: "comunidad",
     author: "Eli (María Elisa Araya)",
     summary:
-      "Conceptos de Stellar explicados de forma simple, hecho por una dev de la comunidad argentina (Office Hours 3, Argentina Builder Challenge). Muy bueno si algún concepto todavía cuesta.",
+      "Los conceptos de Stellar explicados simple, por una dev de la comunidad argentina. Útil si algún concepto todavía cuesta.",
     tags: ["Conceptos", "Principiantes"],
     links: [{ label: "GitHub", href: "https://github.com/mariaelisaaraya/afterStellar" }],
     date: "2026-09-19",
@@ -495,7 +494,7 @@ export const library: Entry[] = [
     kind: "repositorio",
     origin: "oficial",
     author: "Stellar",
-    summary: "Contratos de ejemplo oficiales: tokens, autorización, eventos, storage y más.",
+    summary: "Contratos de ejemplo oficiales para estudiar y copiar: tokens, autorización, eventos, storage y más.",
     tags: ["Oficial", "Soroban"],
     links: [{ label: "GitHub", href: "https://github.com/stellar/soroban-examples" }],
     date: "2026-09-22",
@@ -505,11 +504,27 @@ export const library: Entry[] = [
 
   // ── Skills e IA ────────────────────────────────────────────────────
   {
+    id: "stellar-build",
+    title: "Stellar Build: mis 12 skills",
+    kind: "skill",
+    origin: "mio",
+    summary:
+      "Las skills de Claude Code del toolkit del programa: contratos, frontend, assets, datos, estándares, mainnet, pagos x402, ZK, ideas, competencia, rondas del SCF y cuál usar. Fue mi primer entregable.",
+    tags: ["Claude Code", "Toolkit"],
+    links: [
+      { label: "Ver las skills", href: `${STELLAR_BUILD}/tree/main/.claude/skills` },
+      { label: "Repo", href: STELLAR_BUILD },
+    ],
+    date: "2026-09-06",
+    week: 1,
+    order: 1,
+  },
+  {
     id: "raven",
     title: "Stellar Raven",
     kind: "skill",
     summary:
-      "Servidor MCP de Stellar para agentes de IA: con una sola conexión, el agente tiene la documentación, datos en vivo del ecosistema y guías probadas.",
+      "Un MCP que conecta a tu agente de IA con la documentación de Stellar, datos en vivo del ecosistema y guías probadas, con una sola conexión.",
     tags: ["MCP", "IA"],
     links: [{ label: "raven.stellar.buzz", href: "https://raven.stellar.buzz/" }],
     date: "2026-09-21",
@@ -523,7 +538,7 @@ export const library: Entry[] = [
     origin: "oficial",
     author: "Stellar",
     summary:
-      "El catálogo oficial de skills para que un agente de IA construya en Stellar: contratos, frontend, assets, RPC, pagos de agentes y más, junto con skills de la comunidad.",
+      "El catálogo oficial de skills para que tu agente de IA construya en Stellar: contratos, frontend, assets, RPC, pagos y más, junto con skills de la comunidad.",
     tags: ["Oficial", "IA", "Catálogo"],
     links: [{ label: "skills.stellar.org", href: "https://skills.stellar.org/" }],
     date: "2026-10-01",
@@ -537,8 +552,7 @@ export const library: Entry[] = [
     kind: "skill",
     origin: "oficial",
     author: "OpenZeppelin",
-    summary:
-      "Un MCP que le da a tu agente las plantillas auditadas de OpenZeppelin para generar contratos Soroban seguros.",
+    summary: "Un MCP que le da a tu agente las plantillas auditadas de OpenZeppelin para generar contratos Soroban seguros.",
     tags: ["MCP", "Seguridad", "IA"],
     links: [{ label: "mcp.openzeppelin.com", href: "https://mcp.openzeppelin.com/" }],
     date: "2026-10-01",
@@ -568,7 +582,7 @@ export const library: Entry[] = [
     origin: "comunidad",
     author: "Bran18",
     summary:
-      "Skill que le enseña a tu agente a usar Reflector, el oráculo de precios de Stellar, dentro de un contrato. Se instala con npx skills add Bran18/reflector-skill.",
+      "Le enseña a tu agente a usar Reflector, el oráculo de precios de Stellar, dentro de un contrato. Se instala con npx skills add Bran18/reflector-skill.",
     tags: ["Oráculo", "Precios", "IA"],
     links: [{ label: "GitHub", href: "https://github.com/Bran18/reflector-skill" }],
     date: "2026-10-01",
@@ -576,33 +590,6 @@ export const library: Entry[] = [
     order: 4,
     session: "clase-vibe-coding",
   },
-  {
-    id: "docs-mcp",
-    title: "docs-mcp",
-    kind: "skill",
-    origin: "comunidad",
-    author: "probelabs",
-    summary: "Convierte cualquier repo o carpeta de documentación en un MCP para buscar en ella desde el agente.",
-    tags: ["MCP", "Documentación"],
-    links: [{ label: "GitHub", href: "https://github.com/probelabs/docs-mcp" }],
-    date: "2026-10-01",
-    week: 5,
-    order: 5,
-    session: "clase-vibe-coding",
-    review: "Sin cambios desde octubre de 2025: nadie lo mantiene.",
-  },
-  skill("smart-contracts", "Contratos en Rust con soroban-sdk: estructura, storage, autorización, pruebas y seguridad.", 1),
-  skill("dapp", "Frontends que llaman contratos con el SDK de JavaScript y wallets.", 2),
-  skill("assets", "Assets clásicos, trustlines y el puente SAC hacia los contratos.", 3),
-  skill("data", "Consultar datos de la red vía Stellar RPC y Horizon.", 4),
-  skill("standards", "SEPs, CAPs y referencias del ecosistema.", 5),
-  skill("deploy-stellar-mainnet", "Checklist para pasar de testnet a mainnet.", 6),
-  skill("agentic-payments", "Pagos entre máquinas y APIs pagas (x402).", 7),
-  skill("zk-proofs", "Pruebas de conocimiento cero y patrones de privacidad.", 8),
-  skill("find-stellar-idea", "Descubrir qué construir sobre Stellar.", 9),
-  skill("stellar-competitive-landscape", "Mapear la competencia de una idea en el ecosistema.", 10),
-  skill("scf-round-watcher", "Seguir las rondas del Stellar Community Fund.", 11),
-  skill("stellar-help", "Qué skill usar según en qué etapa está el proyecto.", 12),
 
   // ── Herramientas ───────────────────────────────────────────────────
   {
@@ -611,7 +598,7 @@ export const library: Entry[] = [
     kind: "herramienta",
     author: "Vercel",
     summary:
-      "Describes la app con palabras y v0 genera el código en Next.js, listo para publicar en Vercel. Rápido para armar el frontend de un prototipo.",
+      "Describes la app con palabras y v0 genera el código en Next.js, listo para publicar en Vercel. Rápido para el frontend de un prototipo.",
     tags: ["IA", "Frontend", "Next.js"],
     links: [{ label: "v0.app", href: "https://v0.app/" }],
     date: "2026-10-01",
@@ -634,7 +621,7 @@ export const library: Entry[] = [
     id: "stellar-lab",
     title: "Stellar Lab",
     kind: "herramienta",
-    summary: "Herramienta web oficial para crear cuentas, armar transacciones e invocar contratos sin terminal.",
+    summary: "La web oficial para crear cuentas, armar transacciones e invocar contratos sin terminal.",
     tags: ["Oficial", "Web"],
     links: [{ label: "lab.stellar.org", href: "https://lab.stellar.org" }],
     date: "2026-09-22",
@@ -645,7 +632,7 @@ export const library: Entry[] = [
     id: "stellar-expert",
     title: "stellar.expert",
     kind: "herramienta",
-    summary: "Explorador de la blockchain: cuentas, transacciones, contratos, eventos y storage.",
+    summary: "El explorador de la red: muestra cuentas, transacciones, contratos, eventos y storage.",
     tags: ["Explorador"],
     links: [{ label: "Testnet", href: "https://stellar.expert/explorer/testnet" }],
     date: "2026-09-22",
@@ -656,7 +643,7 @@ export const library: Entry[] = [
     id: "rust-wasm",
     title: "Rust + wasm32v1-none",
     kind: "herramienta",
-    summary: "El lenguaje de los contratos y el target que los compila al WebAssembly que corre la red.",
+    summary: "Rust es el lenguaje de los contratos; wasm32v1-none es el target que los compila para que corran en la red.",
     tags: ["Rust"],
     links: [{ label: "rustup", href: "https://rustup.rs" }],
     date: "2026-09-22",
@@ -667,86 +654,12 @@ export const library: Entry[] = [
     id: "stellar-sdk-js",
     title: "@stellar/stellar-sdk",
     kind: "herramienta",
-    summary: "El SDK de JavaScript. En este sitio despliega e invoca contratos desde el navegador.",
+    summary: "El SDK de JavaScript para llamar contratos desde una web. Este sitio lo usa para desplegar e invocar desde el navegador.",
     tags: ["JavaScript"],
     links: [{ label: "npm", href: "https://www.npmjs.com/package/@stellar/stellar-sdk" }],
     date: "2026-09-22",
     week: 4,
     order: 5,
-  },
-  {
-    id: "friendbot",
-    review: "Ya lo hace el CLI con keys generate --fund.",
-    title: "Friendbot",
-    kind: "herramienta",
-    summary: "El servicio de testnet que regala XLM de prueba para fondear cuentas nuevas.",
-    tags: ["Testnet"],
-    links: [
-      {
-        label: "Documentación",
-        href: "https://developers.stellar.org/docs/learn/fundamentals/networks#friendbot",
-      },
-    ],
-    date: "2026-09-22",
-    week: 4,
-    order: 6,
-  },
-
-  // ── Lecturas ───────────────────────────────────────────────────────
-  {
-    id: "tellus-green-pill-5",
-    review: "Noticias de septiembre: ya pasaron.",
-    title: "Tellus Green Pill N°5",
-    kind: "lectura",
-    author: "Tellus",
-    summary:
-      "Resumen de dos semanas del ecosistema: el dólar más usado llega a Stellar, un nuevo hub en Santiago y quiénes están enseñando a los agentes de IA a construir en la red.",
-    tags: ["Newsletter", "Ecosistema"],
-    links: [
-      {
-        label: "Leer",
-        href: "https://blog.telluscoop.com/p/tellus-green-pill-n-5-una-dosis-el-nico-resumen-que-necesitas",
-      },
-    ],
-    date: "2026-09-17",
-    week: 3,
-    order: 1,
-  },
-  {
-    id: "post-dia-2",
-    review: "Post de LinkedIn: no es material de consulta.",
-    title: "Día 2: autorización y estados",
-    kind: "lectura",
-    author: "Juan José Valencia",
-    summary: "Resumen del segundo día del bootcamp, escrito por un compañero del programa.",
-    tags: ["Bootcamp", "LinkedIn"],
-    links: [
-      {
-        label: "LinkedIn",
-        href: "https://www.linkedin.com/posts/juan-jose-valencia-45986813_d%C3%ADa-2-iniciamos-con-autorizacion-estados-ugcPost-7506686224733184000-Yk9v",
-      },
-    ],
-    date: "2026-09-18",
-    week: 3,
-    order: 2,
-  },
-  {
-    id: "post-semana-3",
-    review: "Post de LinkedIn: no es material de consulta.",
-    title: "Terminamos la semana 3 publicando un smart contract",
-    kind: "lectura",
-    author: "Juan José Valencia",
-    summary: "Cierre de la tercera semana del programa, escrito por un compañero.",
-    tags: ["Bootcamp", "LinkedIn"],
-    links: [
-      {
-        label: "LinkedIn",
-        href: "https://www.linkedin.com/posts/juan-jose-valencia-45986813_terminamos-la-3-semana-publicando-smart-contract-ugcPost-7508106057219727361-dKL1",
-      },
-    ],
-    date: "2026-09-22",
-    week: 4,
-    order: 3,
   },
 
   // ── Comunidad y oportunidades ──────────────────────────────────────
@@ -754,7 +667,7 @@ export const library: Entry[] = [
     id: "stellar-bolivia-ig",
     title: "Stellar Bolivia",
     kind: "comunidad",
-    summary: "La comunidad de Stellar en Bolivia: novedades, eventos y convocatorias.",
+    summary: "El Instagram de la comunidad en Bolivia: novedades, eventos y convocatorias.",
     tags: ["Bolivia", "Instagram"],
     links: [{ label: "Instagram", href: "https://www.instagram.com/stellar_bolivia/" }],
     date: "2026-09-18",
@@ -763,10 +676,9 @@ export const library: Entry[] = [
   },
   {
     id: "meridian-2026",
-    review: "Convocatoria con fecha: revisar si sigue abierta.",
     title: "Meridian 2026 en Lisboa",
     kind: "comunidad",
-    summary: "La conferencia anual de Stellar. Compartieron la convocatoria para postular y viajar.",
+    summary: "La conferencia anual de Stellar, el 28 y 29 de octubre en Lisboa. La inscripción está abierta.",
     tags: ["Conferencia", "Convocatoria"],
     links: [
       { label: "Sitio oficial", href: "https://meridian.stellar.org" },
@@ -778,12 +690,11 @@ export const library: Entry[] = [
   },
   {
     id: "becas-ubc",
-    review: "Convocatoria con fecha: revisar si sigue abierta.",
     title: "Becas UBC 2026 (BAF)",
     kind: "comunidad",
     author: "BAF",
     summary:
-      "BAF lleva estudiantes de Latinoamérica a la University Blockchain Conference en Austin, Texas: más de 1.000 estudiantes de 100 universidades.",
+      "Beca de 500 USD más la entrada para la University Blockchain Conference en Austin, el 20 y 21 de noviembre. Las postulaciones cierran el 7 de octubre.",
     tags: ["Beca", "Convocatoria"],
     links: [
       { label: "Postular", href: "https://becas-ubc.vercel.app" },
